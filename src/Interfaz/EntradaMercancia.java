@@ -112,9 +112,7 @@ public class EntradaMercancia extends javax.swing.JDialog {
         try {
             String selectCompra = "SELECT * FROM REPORTE_COMPRAS WHERE FOLIO=" + this.folioCompra;
             
-            ResultSet consulta = SQLConnection.select(selectCompra);
-            
-            System.out.println(selectCompra);
+            ResultSet consulta = SQLConnection.select(selectCompra);                        
             
             if(!consulta.next())
                 return;                        

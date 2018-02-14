@@ -252,9 +252,7 @@ public class Venta extends javax.swing.JDialog {
             try {
                 String sql = "SELECT FOLIO_INGRESO FROM PAGOS_DE_CONTADO WHERE FOLIO_VENTA=" + folioVenta;
                 
-                ResultSet consulta = SQLConnection.select(sql);
-                
-                System.out.println(sql);
+                ResultSet consulta = SQLConnection.select(sql);                                
                 
                 if(consulta.next()){
                     int folioIngreso = consulta.getInt("FOLIO_INGRESO");

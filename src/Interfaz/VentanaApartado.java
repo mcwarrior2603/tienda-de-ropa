@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -230,12 +231,7 @@ public class VentanaApartado extends javax.swing.JFrame {
     }//GEN-LAST:event_txtClienteMouseClicked
 
     private void btnAbonarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbonarActionPerformed
-        Ingreso.nuevo(
-                this, 
-                idUsuarioActual, 
-                ((Apartado)cboApartados.getSelectedItem()).folio);
-        cargarClienteActual();
-        cargarApartado();
+        abonar();
     }//GEN-LAST:event_btnAbonarActionPerformed
 
     private void tableAbonosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableAbonosMouseClicked
@@ -341,6 +337,42 @@ public class VentanaApartado extends javax.swing.JFrame {
         }        
     }        
     
+    private void abonar(){
+        boolean valido = false;
+        
+        SQLConnection.startTransaction();
+        
+        int folioIngreso = Ingreso.nuevoParaAbono(
+                this, 
+                idUsuarioActual, 
+                ((Apartado)cboApartados.getSelectedItem()).folio);
+        
+        if(folioIngreso != 0){
+            String sql = "INSERT INTO ABONOS("
+                    + "FOLIO_APARTADO,"
+                    + "FOLIO_TICKET)"
+                    + "VALUES("
+                    + folioActual + ","
+                    + folioIngreso + ")";
+            
+            valido = SQLConnection.update(sql);
+        }
+        
+        if(valido){
+            SQLConnection.commit();
+            JOptionPane.showMessageDialog(
+                    this, 
+                    "Abono correcto");            
+        }else{
+            SQLConnection.rollback();
+            JOptionPane.showMessageDialog(
+                    this, 
+                    "No fue posible registrar el abono");            
+        }
+        
+        cargarClienteActual();
+        cargarApartado();
+    }
     
     /**
      * @param args the command line arguments

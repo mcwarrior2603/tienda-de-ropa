@@ -33,9 +33,7 @@ public class Seguridad {
                 * fechaNumero) % digitoValidacion);                
         
         String hex = Integer.toHexString(valor);                
-        
-        System.out.println(hex);
-        
+                        
         return hex.equals(autorizacion);
     }
     
@@ -54,9 +52,7 @@ public class Seguridad {
         
         int valor = Math.abs((folio * idUsuario * digitoValidacion / (fechaNumero * idUsuario)) % digitoValidacion );
         
-        String hex = Integer.toHexString(valor);                
-        
-        System.out.println(hex);
+        String hex = Integer.toHexString(valor);                                
         
         return hex.equals(autorizacion);    
     }

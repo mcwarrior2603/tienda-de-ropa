@@ -480,7 +480,7 @@ public class Main extends JFrame{
                         + "VALUES("
                         + folioVentaActual + ","
                         + folioIngreso + ")";
-                if(SQLConnection.update(sqlPago) && updateVenta(sqlPago))
+                if(SQLConnection.update(sqlPago) && updateVenta("Efectivo"))
                     valido = true;
             }
         }
@@ -493,7 +493,7 @@ public class Main extends JFrame{
             modeloVenta.setRowCount(0);
             total = 0;
             txtTotal.setText(total + "");
-            createVenta();
+            folioVentaActual = createVenta();
         }else{
             SQLConnection.rollback();
             JOptionPane.showMessageDialog(
@@ -505,9 +505,10 @@ public class Main extends JFrame{
     
     private boolean updateVenta(String formaDePago){
         String sql = "UPDATE VENTAS SET "
-                + "FORMA_DE_PAGO='" + formaDePago + "',"
-                + "ID_USUARIO=" + idUsuario + " "
-                + "FECHA=NOW()"
+                + "FORMA_PAGO='" + formaDePago + "',"
+                + "ID_USUARIO=" + idUsuario + ", "
+                + "FECHA=NOW(), "
+                + "TOTAL=" + total + " "
                 + "WHERE FOLIO=" + folioVentaActual;
         String deleteVentaPendiente = "DELETE FROM VENTAS_PENDIENTES "
                 + "WHERE FOLIO_VENTA=" + folioVentaActual;

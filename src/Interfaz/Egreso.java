@@ -361,9 +361,7 @@ public class Egreso extends javax.swing.JDialog {
         egreso.txtMonto.setEnabled(false);
         
         egreso.setVisible(true);
-        egreso.dispose();
-        
-        System.out.println(egreso.folioActual);
+        egreso.dispose();                
         
         return egreso.folioActual;
     }

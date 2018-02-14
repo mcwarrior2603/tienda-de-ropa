@@ -24,8 +24,9 @@ import javax.swing.JOptionPane;
  */
 public class Ingreso extends javax.swing.JDialog {
 
-    private static final int NUEVO = 1;
+    private static final int NUEVO = 1;    
     private static final int VER = 2;
+    private static final int NUEVO_CON_REFERENCIA = 3;
     
     private int idUsuarioActual;
     private int folioActual;
@@ -306,52 +307,33 @@ public class Ingreso extends javax.swing.JDialog {
         + idUsuarioActual + ","
         + "'" + cboTipo.getSelectedItem() + "',"
         + txtMonto.getText() + ","
-        + "'" + txtDetalles.getText() + "');";                        
+        + "'" + txtDetalles.getText() + "');";   
+        String getFolio = "SELECT MAX(FOLIO) AS FOLIO FROM INGRESOS";
 
-        SQLConnection.startTransaction();
+        if(uso != NUEVO_CON_REFERENCIA)
+            SQLConnection.startTransaction();
         
         if(SQLConnection.update(insertIngreso)){
-            if(cboTipo.getSelectedItem().toString().equalsIgnoreCase("abono")){
-                                                
-                String insertAbono = "INSERT INTO ABONOS("
-                        + "FOLIO_TICKET,"
-                        + "FOLIO_APARTADO) "
-                        + "VALUES("
-                        +"(select max(folio) from ingresos), "
-                        + "" + txtFolioReferencia.getText() + ")";
-                String actualizarSaldo = "UPDATE APARTADOS "
-                        + "SET SALDO_PENDIENTE=SALDO_PENDIENTE-" + txtMonto.getText() + " "
-                        + "WHERE FOLIO=" + txtFolioReferencia.getText();
+            
+            try {                
+                ResultSet consulta = SQLConnection.select(getFolio);
                 
-                if(!SQLConnection.update(insertAbono) || !SQLConnection.update(actualizarSaldo)){
-                    SQLConnection.rollback();
-                    JOptionPane.showMessageDialog(this, "Ha ocurrido un fallo", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+                consulta.next();
                 
-            }else if(cboTipo.getSelectedItem().toString().equalsIgnoreCase("Pago de contado")){
-               
-                String insertPago = "INSERT INTO PAGOS_DE_CONTADO("
-                        + "FOLIO_INGRESO,"
-                        + "FOLIO_VENTA) "
-                        + "VALUES("
-                        +"(select max(folio) from ingresos), "
-                        + "" + txtFolioReferencia.getText() + ")";
-                
-                if(!SQLConnection.update(insertPago)){
-                    SQLConnection.rollback();
-                    JOptionPane.showMessageDialog(this, "Ha ocurrido un fallo", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }else{
-                    correcto = true;
-                    JOptionPane.showMessageDialog(this, "Ingreso guardado correctamente");
-                    setVisible(false);  
-                }                    
-            }
-        }else{
-            SQLConnection.rollback();
+                folioActual = consulta.getInt("FOLIO");
+                setVisible(false);
+            } catch (SQLException ex) {
+                ManejoDeErrores.reportarError(ex, getFolio);
+            }            
+            
+        }else{            
+            
+            if(uso != NUEVO_CON_REFERENCIA)
+                SQLConnection.rollback();
+            
             JOptionPane.showMessageDialog(this, "Ha ocurrido un fallo", "Error", JOptionPane.ERROR_MESSAGE);
             return;
+            
         }
         
       
@@ -446,16 +428,16 @@ public class Ingreso extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
-    public static boolean nuevo(JFrame parent, int idUsuarioActual){
+    public static int nuevo(JFrame parent, int idUsuarioActual){
         Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO);
         
         dialogo.setVisible(true);               
         dialogo.dispose();
         
-        return dialogo.correcto;
+        return dialogo.folioActual;
     }
     
-    public static boolean nuevo(JFrame parent, int idUsuarioActual, int folioApartado){
+    public static int nuevoParaAbono(JFrame parent, int idUsuarioActual, int folioApartado){
         Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO);
         
         dialogo.txtFolioReferencia.setText(folioApartado + "");        
@@ -463,12 +445,12 @@ public class Ingreso extends javax.swing.JDialog {
         dialogo.setVisible(true);
         dialogo.dispose();
         
-        return dialogo.correcto;
+        return dialogo.folioActual;
         
     }
     
     public static int nuevoParaVenta(JFrame parent, int idUsusarioActual, int folioVenta, float monto){
-        Ingreso ingreso = new Ingreso(parent, true, idUsusarioActual, NUEVO, folioVenta, monto);
+        Ingreso ingreso = new Ingreso(parent, true, idUsusarioActual, NUEVO_CON_REFERENCIA, folioVenta, monto);
         
         ingreso.cboTipo.setSelectedItem("Pago de contado");        
         ingreso.txtMonto.setText(monto + "");
@@ -478,9 +460,7 @@ public class Ingreso extends javax.swing.JDialog {
         ingreso.txtFolioReferencia.setEnabled(false);
         
         ingreso.setVisible(true);
-        ingreso.dispose();
-        
-        System.out.println(ingreso.folioActual);
+        ingreso.dispose();                
         
         return ingreso.folioActual;
     }
@@ -513,11 +493,9 @@ public class Ingreso extends javax.swing.JDialog {
             }
             
             consulta = SQLConnection.select(sqlUsuario);
-            
-            System.out.println(sqlUsuario);
+                        
             if(consulta.next()){
-                txtUsuario.setText(consulta.getString("NOMBRE"));
-                System.out.println("Nombre de Usuario");
+                txtUsuario.setText(consulta.getString("NOMBRE"));                
             }
             
             btnAceptar.setEnabled(true);
