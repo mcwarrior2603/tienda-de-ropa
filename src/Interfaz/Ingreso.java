@@ -306,13 +306,13 @@ public class Ingreso extends javax.swing.JDialog {
         + idUsuarioActual + ","
         + "'" + cboTipo.getSelectedItem() + "',"
         + txtMonto.getText() + ","
-        + "'" + txtDetalles.getText() + "');";
-                
-        SQLConnection.startTransaction();
+        + "'" + txtDetalles.getText() + "');";                        
 
+        SQLConnection.startTransaction();
+        
         if(SQLConnection.update(insertIngreso)){
             if(cboTipo.getSelectedItem().toString().equalsIgnoreCase("abono")){
-                
+                                                
                 String insertAbono = "INSERT INTO ABONOS("
                         + "FOLIO_TICKET,"
                         + "FOLIO_APARTADO) "
@@ -354,10 +354,7 @@ public class Ingreso extends javax.swing.JDialog {
             return;
         }
         
-        SQLConnection.commit();
-        correcto = true;
-        JOptionPane.showMessageDialog(this, "Ingreso guardado correctamente");
-        setVisible(false);        
+      
     }//GEN-LAST:event_btnAceptarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed

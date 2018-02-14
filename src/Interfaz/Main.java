@@ -471,9 +471,19 @@ public class Main extends JFrame{
 
         folioIngreso = Ingreso.nuevoParaVenta(getThis(), idUsuario, folioVentaActual, total);
         
-        if (folioIngreso != 0)
-            valido = true;
-        
+        if (folioIngreso != 0) {
+                        
+            if(folioVentaActual != 0){            
+                String sqlPago = "INSERT INTO PAGOS_DE_CONTADO("
+                        + "FOLIO_VENTA, "
+                        + "FOLIO_INGRESO) "
+                        + "VALUES("
+                        + folioVentaActual + ","
+                        + folioIngreso + ")";
+                if(SQLConnection.update(sqlPago) && updateVenta(sqlPago))
+                    valido = true;
+            }
+        }
         if(valido){
             SQLConnection.commit();
             JOptionPane.showMessageDialog(
