@@ -42,6 +42,8 @@ public class BuscarCliente extends javax.swing.JDialog {
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableClientes = new javax.swing.JTable();
+        jButton2 = new javax.swing.JButton();
+        lblInstrucciones = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -88,6 +90,15 @@ public class BuscarCliente extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(tableClientes);
 
+        jButton2.setText("Nuevo");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        lblInstrucciones.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -95,28 +106,33 @@ public class BuscarCliente extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 377, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton1))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 16, Short.MAX_VALUE))))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addComponent(jLabel1)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(lblInstrucciones, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButton1)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButton2))))
+                .addGap(0, 13, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1)
+                    .addComponent(lblInstrucciones, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 416, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -125,30 +141,7 @@ public class BuscarCliente extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String busqueda = txtNombre.getText().trim();
-        String sql = "SELECT * FROM CLIENTES_CON_FORMATO WHERE INSTR(NOMBRE, '"
-        + busqueda + "')>0;";
-
-        ResultSet res = SQLConnection.select(sql);
-
-        if(res==null)
-        return;
-
-        try {
-            while(tableClientes.getModel().getRowCount()>0)
-            ((DefaultTableModel)tableClientes.getModel()).removeRow(0);
-            while(res.next()){
-                ((DefaultTableModel)tableClientes.getModel()).addRow(
-                    new Object[]{
-                        res.getString("ID"),
-                        res.getString("NOMBRE"),
-                        res.getString("TELEFONO1"),
-                        res.getString("TELEFONO2")
-                    });
-                }
-            } catch (SQLException ex) {
-                ManejoDeErrores.reportarError(ex);
-            }
+        cargarClientes();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void tableClientesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableClientesMouseClicked
@@ -162,8 +155,46 @@ public class BuscarCliente extends javax.swing.JDialog {
         setVisible(false);
     }//GEN-LAST:event_tableClientesMouseClicked
 
-    public static int mostrar(JFrame parent){
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        NuevoCliente.nuevo(null);
+        
+        cargarClientes();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void cargarClientes(){
+        String busqueda = txtNombre.getText().trim();
+        String sql = "SELECT * FROM CLIENTES_CON_FORMATO WHERE INSTR(NOMBRE, '"
+                + busqueda + "')>0;";
+
+        ResultSet res = SQLConnection.select(sql);
+
+        if (res == null) {
+            return;
+        }
+
+        try {
+            while (tableClientes.getModel().getRowCount() > 0) {
+                ((DefaultTableModel) tableClientes.getModel()).removeRow(0);
+            }
+            while (res.next()) {
+                ((DefaultTableModel) tableClientes.getModel()).addRow(
+                        new Object[]{
+                            res.getString("ID"),
+                            res.getString("NOMBRE"),
+                            res.getString("TELEFONO1"),
+                            res.getString("TELEFONO2")
+                        });
+            }
+        } catch (SQLException ex) {
+            ManejoDeErrores.reportarError(ex);
+        }
+    }
+    
+    public static int mostrar(JFrame parent, String instrucciones){
         BuscarCliente dialogo = new BuscarCliente(parent, true);
+        
+        dialogo.lblInstrucciones.setText(instrucciones);
+        
         dialogo.setVisible(true);
         dialogo.dispose();
         
@@ -215,8 +246,10 @@ public class BuscarCliente extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblInstrucciones;
     private javax.swing.JTable tableClientes;
     private Utilidades.JTextfieldPlaceHolder txtNombre;
     // End of variables declaration//GEN-END:variables

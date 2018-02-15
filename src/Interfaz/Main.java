@@ -27,6 +27,7 @@ import java.awt.event.FocusEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -80,7 +81,7 @@ public class Main extends JFrame{
     
     private final PanelSubmenu menuProductos = new PanelSubmenu("Productos", "/res/iconos/productos.png");
     private final PanelSubmenu menuUsuarios = new PanelSubmenu("Usuarios", "/res/iconos/usuarios.png");
-    private final PanelSubmenu menuReportes = new PanelSubmenu("Usuarios", "/res/iconos/reportes.png");
+    private final PanelSubmenu menuReportes = new PanelSubmenu("Reportes", "/res/iconos/reportes.png");
     private final PanelSubmenu menuApartados = new PanelSubmenu("Apartados", "/res/iconos/apartados.png");
     private final PanelSubmenu menuConsultar = new PanelSubmenu("Consultar", "/res/iconos/consultar.png");    
     
@@ -154,8 +155,12 @@ public class Main extends JFrame{
     private Color colorFondo = new Color(0x4d4dff);
     private Color colorPaneles = new Color(0xd9d9d9);
     
+    private float porcentajeApartado = 0.2f;
+    
     private int idUsuario = 1;
     private int folioVentaActual = 0;
+    
+    private ArrayList<Producto> listaProductos = new ArrayList();
     
     private final DefaultTableModel modeloVenta = new DefaultTableModel(
             new Object[]{"Clave", "Producto", "Precio"},0){
@@ -322,6 +327,14 @@ public class Main extends JFrame{
             }   
             
         });
+        btnApartado.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                insertCompraApartado();
+            }
+            
+        });
     }                        
     
     private void setDerecha(){
@@ -391,11 +404,13 @@ public class Main extends JFrame{
         String insertVenta = "INSERT INTO VENTAS("
                 + "ID_USUARIO, "
                 + "FORMA_PAGO, "
+                + "ID_CLIENTE, "
                 + "TOTAL)"
                 + "VALUES("
                 + idUsuario + ","
                 + "'Pendiente',"
-                + total + ")";        
+                + "(SELECT ID FROM CLIENTES WHERE NOMBRE='PUBLICO' AND APELLIDO_PATERNO='GENERAL'),"
+                + 0 + ")";        
         
         SQLConnection.startTransaction();
         if (SQLConnection.update(insertVenta)){
@@ -416,28 +431,38 @@ public class Main extends JFrame{
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        if(valido)
+        if(valido){
             SQLConnection.commit();
-        else 
+            modeloVenta.setRowCount(0);
+            total = 0;
+            txtTotal.setText(total + "");
+        }else 
             SQLConnection.rollback();
         return folioVenta;
     }
     
     private void addProducto(){
         Producto temp = getProducto(txtClave.getText().trim());
-
+        int idAsignacion = 0;
+        
         if (temp == null) {
             return;
-        }
-
-        if(!insertProductoDB(temp))
+        }       
+                
+        idAsignacion = insertProductoDB(temp);
+        if(idAsignacion == 0)
             return;
+        
+        temp.idAsignacion = idAsignacion;
         
         modeloVenta.addRow(new Object[]{
             temp.clave,
             temp.nombre,
             temp.precio
         });
+        
+        listaProductos.add(temp);
+        
         txtClave.setText("");        
 
         total += temp.precio;
@@ -445,7 +470,11 @@ public class Main extends JFrame{
         
     }
     
-    private boolean insertProductoDB(Producto nuevo){
+    private int insertProductoDB(Producto nuevo){
+        int idASignacion = 0;
+        
+        SQLConnection.startTransaction();
+        
         String sql = "INSERT INTO VENTAS_PRODUCTOS("
                 + "FOLIO_VENTA, "
                 + "CLAVE_PRODUCTO, "
@@ -453,13 +482,27 @@ public class Main extends JFrame{
                 + "VALUES("
                 + folioVentaActual + ","
                 + "'" + nuevo.clave + "',"
-                + "'" + nuevo.precio + "')";
+                + nuevo.precio + ")";
                                             
-        if(!SQLConnection.update(sql)){
-            JOptionPane.showMessageDialog(this, "No se pudo agregar el producto");
-            return false;
+        if(SQLConnection.update(sql)){
+            try {
+                String selectID = "SELECT MAX(ID_ASIGNACION) AS ID FROM VENTAS_PRODUCTOS;";
+                
+                ResultSet consulta = SQLConnection.select(selectID);
+                
+                consulta.next();
+                
+                idASignacion = consulta.getInt("ID");
+                
+                SQLConnection.commit();
+            } catch (SQLException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }else{
+            JOptionPane.showMessageDialog(this, "No se pudo agregar el producto");            
         }
-        return true;                
+        return idASignacion;                
     }
     
     private void insertCompraContado(){
@@ -489,10 +532,7 @@ public class Main extends JFrame{
             JOptionPane.showMessageDialog(
                     this,
                     "Compra registrada correctamente"
-            );
-            modeloVenta.setRowCount(0);
-            total = 0;
-            txtTotal.setText(total + "");
+            );            
             folioVentaActual = createVenta();
         }else{
             SQLConnection.rollback();
@@ -502,6 +542,95 @@ public class Main extends JFrame{
             );
         }
     }                
+    
+    private void insertCompraApartado(){
+    
+        boolean valido = true;
+        
+        SQLConnection.startTransaction();                
+        
+        int idCliente = BuscarCliente.mostrar(
+                this, 
+                "Seleccione el cliente que aparta");        
+        if(idCliente == 0)
+            return;
+        
+        for(int i = 0 ; i < listaProductos.size() && valido ; i++){
+            int folioApartado = createApartados(
+                    listaProductos.get(i), 
+                    idCliente);
+            
+            valido = valido && (folioApartado != 0);            
+        }
+        
+        updateVenta("Apartado");
+        
+        if(valido){ 
+            SQLConnection.commit();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Venta realizada correctamente"
+            );
+            
+            folioVentaActual = createVenta();            
+        }else{
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No fue posible realizar la compra"
+            );
+            SQLConnection.rollback();
+        }
+    }
+    
+    private int createApartados(Producto ing, int idCliente){
+        try {
+            boolean valido = true;
+            int folioApartado = 0;
+            int folioIngreso = 0;
+            
+            String sqlBase = "INSERT INTO APARTADOS("
+                    + "ID_ASIGNACION, "
+                    + "ID_CLIENTE,"
+                    + "COSTO,"
+                    + "SALDO_PENDIENTE)"
+                    + "VALUES("
+                    + ing.idAsignacion + ","
+                    + idCliente + ","
+                    + ing.precio + ","
+                    + ing.precio + ")";            
+            String getFolio = "SELECT MAX(FOLIO) AS FOLIO FROM APARTADOS";
+            
+            if(!SQLConnection.update(sqlBase))
+                return 0;
+            
+            ResultSet consulta = SQLConnection.select(getFolio);
+            consulta.next();
+            folioApartado = consulta.getInt("FOLIO");
+            
+            folioIngreso = Ingreso.nuevoParaEnganche(
+                    this,
+                    idUsuario,
+                    folioApartado,
+                    ing.precio * porcentajeApartado,
+                    ing.nombre);
+            if(folioIngreso == 0)
+                return 0;
+            
+            String insertAbono = "INSERT INTO ABONOS("
+                    + "FOLIO_TICKET, "
+                    + "FOLIO_APARTADO)"
+                    + "VALUES("                    
+                    + folioIngreso + ","
+                    + folioApartado + ")";
+            if(!SQLConnection.update(insertAbono)) 
+                return 0;                                            
+                    
+            return folioApartado;
+        } catch (SQLException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
     
     private boolean updateVenta(String formaDePago){
         String sql = "UPDATE VENTAS SET "

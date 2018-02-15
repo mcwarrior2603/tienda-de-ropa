@@ -19,6 +19,7 @@ public class Producto {
     public String detalles;
     public String imagen;
     public int existencia;
+    public int idAsignacion;
 
     public Producto(String clave, String nombre, int existencia) {
         this.clave = clave;

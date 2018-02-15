@@ -42,7 +42,7 @@ public class VentanaApartado extends javax.swing.JFrame {
     /**
      * Creates new form Apartado
      */
-    public VentanaApartado(int idUsuarioActual) {
+    private VentanaApartado(int idUsuarioActual) {
         initComponents();     
         
         this.idUsuarioActual = idUsuarioActual;
@@ -52,7 +52,7 @@ public class VentanaApartado extends javax.swing.JFrame {
         initComponents();
         
         this.idUsuarioActual = idUsuarioActual;
-        this.subfolio = subfolio;
+        this.subfolio = subfolio;                
         
         cargarSubfolio();
     }
@@ -222,7 +222,7 @@ public class VentanaApartado extends javax.swing.JFrame {
 
     private void txtClienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtClienteMouseClicked
         if (evt.getClickCount() == 2) {
-            idClienteActual = BuscarCliente.mostrar(this);            
+            idClienteActual = BuscarCliente.mostrar(this, "Seleccione el cliente");            
             if (idClienteActual == 0) 
                 return;            
             cargarClienteActual();
@@ -318,6 +318,9 @@ public class VentanaApartado extends javax.swing.JFrame {
             txtPrecio.setText(temp.precio + "");
             txtSaldo.setText(temp.saldoPendiente + "");                        
             
+            if(temp.saldoPendiente == 0)
+                btnAbonar.setEnabled(false);            
+            
             sql = "SELECT * FROM ABONOS_APARTADOS WHERE FOLIO_APARTADO=" + temp.folio;
             ResultSet consulta = SQLConnection.select(sql);
             
@@ -345,7 +348,8 @@ public class VentanaApartado extends javax.swing.JFrame {
         int folioIngreso = Ingreso.nuevoParaAbono(
                 this, 
                 idUsuarioActual, 
-                ((Apartado)cboApartados.getSelectedItem()).folio);
+                ((Apartado)cboApartados.getSelectedItem()).folio,
+                ((Apartado)cboApartados.getSelectedItem()).nombre);
         
         if(folioIngreso != 0){
             String sql = "INSERT INTO ABONOS("

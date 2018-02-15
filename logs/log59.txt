@@ -1,0 +1,24 @@
+You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'PUBLICO' AND APELLIDO='GENERAL'),0.0)' at line 1
+-------------Inforación adicional----------------
+INSERT INTO VENTAS(ID_USUARIO, FORMA_PAGO, ID_CLIENTE, TOTAL)VALUES(1,'Pendiente','(SELECT ID FROM CLIENTES WHERE NOMBRE='PUBLICO' AND APELLIDO='GENERAL'),0.0)
+-------------------------------------------------
+com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'PUBLICO' AND APELLIDO='GENERAL'),0.0)' at line 1
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:404)
+	at com.mysql.jdbc.Util.getInstance(Util.java:387)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:942)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3966)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3902)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2526)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2673)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2545)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2503)
+	at com.mysql.jdbc.StatementImpl.executeInternal(StatementImpl.java:839)
+	at com.mysql.jdbc.StatementImpl.execute(StatementImpl.java:739)
+	at BaseDeDatos.SQLConnection.update(SQLConnection.java:125)
+	at Interfaz.Main.createVenta(Main.java:416)
+	at Interfaz.Main.<init>(Main.java:184)
+	at Interfaz.Main.main(Main.java:692)

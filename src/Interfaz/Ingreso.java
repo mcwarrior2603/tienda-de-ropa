@@ -437,16 +437,34 @@ public class Ingreso extends javax.swing.JDialog {
         return dialogo.folioActual;
     }
     
-    public static int nuevoParaAbono(JFrame parent, int idUsuarioActual, int folioApartado){
+    public static int nuevoParaAbono(JFrame parent, int idUsuarioActual, 
+            int folioApartado, String apartado){
         Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO);
         
         dialogo.txtFolioReferencia.setText(folioApartado + "");        
+        dialogo.txtDetalles.setText("Apartado:" + apartado);
         
         dialogo.setVisible(true);
         dialogo.dispose();
         
         return dialogo.folioActual;
         
+    }
+    
+    public static int nuevoParaEnganche(JFrame parent, int idUsuarioActual, 
+            int folioApartado, float monto, String apartado){
+        Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO);
+        
+        dialogo.txtMonto.setText(monto + "");
+        dialogo.txtFolioReferencia.setText(folioApartado + "");        
+        dialogo.txtDetalles.setText("Apartado:" + apartado);
+        
+        dialogo.txtMonto.setEditable(false);
+        
+        dialogo.setVisible(true);
+        dialogo.dispose();
+        
+        return dialogo.folioActual;
     }
     
     public static int nuevoParaVenta(JFrame parent, int idUsusarioActual, int folioVenta, float monto){
