@@ -67,7 +67,7 @@ public class Inventario extends javax.swing.JFrame {
         rbtnUsado = new javax.swing.JRadioButton();
         rbtnNuevoUsado = new javax.swing.JRadioButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N

@@ -14,7 +14,7 @@ public class Producto {
     public String clave;
     public String nombre;
     public boolean nuevo;
-    public String categoria;
+    public String categoria;   
     public float precio;
     public String detalles;
     public String imagen;
@@ -32,5 +32,10 @@ public class Producto {
         this.nombre = nombre;
         this.precio = precio;
     }
-           
+    public Producto(String clave, String nombre, float precio, int idAsignacion) {
+        this.clave = clave;
+        this.nombre = nombre;
+        this.precio = precio;
+        this.idAsignacion = idAsignacion;
+    }      
 }

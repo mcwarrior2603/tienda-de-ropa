@@ -64,6 +64,7 @@ public class ReporteEgresos extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         txtFechaInicio = new javax.swing.JFormattedTextField();
         txtPeriodo = new javax.swing.JRadioButton();
@@ -74,19 +75,21 @@ public class ReporteEgresos extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tableEgresos = new javax.swing.JTable();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N
         jLabel1.setText("Reporte Ingresos");
 
         txtFechaInicio.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy/MM/d"))));
 
+        buttonGroup1.add(txtPeriodo);
         txtPeriodo.setText("Periodo");
 
         jLabel2.setText("al");
 
         txtFechaFin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy/MM/dd"))));
 
+        buttonGroup1.add(rbtnHoy);
         rbtnHoy.setSelected(true);
         rbtnHoy.setText("Hoy");
 
@@ -241,6 +244,7 @@ public class ReporteEgresos extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

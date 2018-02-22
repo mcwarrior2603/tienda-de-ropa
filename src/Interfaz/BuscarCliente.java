@@ -25,7 +25,11 @@ public class BuscarCliente extends javax.swing.JDialog {
      */
     private BuscarCliente(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        initComponents();                
+        initComponents();      
+                
+        setLocationRelativeTo(null);
+        
+        cargarClientes();
     }
 
     /**
@@ -156,7 +160,7 @@ public class BuscarCliente extends javax.swing.JDialog {
     }//GEN-LAST:event_tableClientesMouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        NuevoCliente.nuevo(null);
+        Clientes.nuevo(null);
         
         cargarClientes();
     }//GEN-LAST:event_jButton2ActionPerformed

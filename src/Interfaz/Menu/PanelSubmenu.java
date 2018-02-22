@@ -77,7 +77,7 @@ public class PanelSubmenu extends JLayeredPane{
             public void mouseEntered(MouseEvent ev){
                 panelFondo.setBackground(fondo);
                 panelFondo.setOpaque(true);
-                setSize(width, items.size() * ItemSubmenu.height + height + 5);                                                                
+                setSize(width, items.size() * ItemSubmenu.height + height + 10);                                                                
                 for(ItemSubmenu temp : items){
                     panelFondo.add(temp);                                        
                 }

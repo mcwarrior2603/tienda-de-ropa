@@ -29,7 +29,9 @@ public class DialogoUsuario extends javax.swing.JDialog {
     
     private int uso = 0;
     private int idUsuarioActual = 0;
-    
+    private int nivelUsuarioActual = 0;    
+    private int idUsuarioModificado = 0;
+            
     private boolean usuarioValido = false;
     private boolean contraseniaValida = false;
     
@@ -38,12 +40,14 @@ public class DialogoUsuario extends javax.swing.JDialog {
     /**
      * Creates new form DialogoUsuario
      */
-    private DialogoUsuario(java.awt.Frame parent, boolean modal, int uso, int idUsuarioActual) {
+    private DialogoUsuario(java.awt.Frame parent, boolean modal, int uso, 
+            int idUsuarioActual, int nivelUsuario) {
         super(parent, modal);
         initComponents();
         
         this.uso = uso;
         this.idUsuarioActual = idUsuarioActual;
+        this.nivelUsuarioActual = nivelUsuario;
         
         cargarNiveles();
         
@@ -96,6 +100,11 @@ public class DialogoUsuario extends javax.swing.JDialog {
         chkActivo.setText("Activo");
 
         jButton1.setText("Cancelar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Guardar");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -164,9 +173,10 @@ public class DialogoUsuario extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        if (!usuarioValido || !contraseniaValida) 
+            return;        
+
         if(uso == NUEVO){
-            if(!usuarioValido || !contraseniaValida)
-                return;
             String sql = "INSERT INTO USUARIOS("
                     + "NOMBRE, "
                     + "CONTRASENIA, "
@@ -184,6 +194,20 @@ public class DialogoUsuario extends javax.swing.JDialog {
             }else{
                 JOptionPane.showMessageDialog(this, "No fue posible crear el usuario");
             }
+        }else if(uso == MODIFICAR){
+            String sql = "UPDATE USUARIOS SET "
+                    + "NOMBRE='" + txtUsuario.getText() + "',"
+                    + "CONTRASENIA='" + BCrypt.hashpw(txtContrasenia.getText(), BCrypt.gensalt()) + "',"
+                    + "ID_NIVEL=" + + ((NivelesCliente)cboNivel.getSelectedItem()).id + ","
+                    + "ACTIVO=" + chkActivo.isSelected() + " "
+                    + "WHERE ID=" + idUsuarioModificado;
+            
+            if(SQLConnection.update(sql)){
+                JOptionPane.showMessageDialog(this, "Usuario guardado correctamente");
+                setVisible(false);                
+            }else{
+                JOptionPane.showMessageDialog(this, "No fue posible modificar el usuario");
+            }
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -191,11 +215,21 @@ public class DialogoUsuario extends javax.swing.JDialog {
         try {
             if(txtUsuario.getText().trim().isEmpty())
                 return;
-            String sql = "SELECT NOMBRE FROM USUARIOS WHERE NOMBRE='" + txtUsuario.getText().trim() + "'";
+            String sql = "SELECT ID, NOMBRE, ID_NIVEL FROM USUARIOS WHERE NOMBRE='" + txtUsuario.getText().trim() + "'";
             
             ResultSet consulta = SQLConnection.select(sql);
-            
-            usuarioValido = !consulta.next();
+            if(uso == NUEVO){
+                usuarioValido = !consulta.next();
+            } else if(uso == MODIFICAR){                
+                if(consulta.next()){
+                    if(consulta.getInt("ID_NIVEL") > nivelUsuarioActual
+                            || consulta.getInt("ID") == idUsuarioActual){
+                        usuarioValido = true;
+                        idUsuarioModificado =  consulta.getInt("ID");
+                        cargarUsuario(idUsuarioModificado);
+                    }
+                }
+            }
             
             if(usuarioValido){
                 lblCheck.setIcon(new ImageIcon(new ImageIcon(
@@ -221,6 +255,10 @@ public class DialogoUsuario extends javax.swing.JDialog {
             lblContrasenia.setText("");
     }//GEN-LAST:event_txtConfirmarContraseniaFocusLost
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        setVisible(false);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     private void cargarNiveles(){
         try {
             String sqlNivel = "SELECT * FROM NIVEL_DE_USUARIO WHERE ID_USUARIO=" + idUsuarioActual;
@@ -229,7 +267,7 @@ public class DialogoUsuario extends javax.swing.JDialog {
             
             if(consulta.next()){
                 int nivel = consulta.getInt("ID_NIVEL");
-                String sql = "SELECT * FROM NIVELES_USUARIO WHERE ID>=" + nivel;
+                String sql = "SELECT * FROM NIVELES_USUARIO WHERE ID>" + nivel;
                 
                 consulta = SQLConnection.select(sql);
                 
@@ -245,8 +283,46 @@ public class DialogoUsuario extends javax.swing.JDialog {
         
     }
     
-    public static void nuevo(Frame parent, int idUsuarioActual){
-        DialogoUsuario dialogo = new DialogoUsuario(parent, true, NUEVO, idUsuarioActual);
+    private void cargarUsuario(int id){
+        try {
+            String sql = "SELECT * FROM USUARIOS WHERE ID=" + id;
+                                    
+            ResultSet consulta = SQLConnection.select(sql);
+            
+            if(consulta.next()){                
+                chkActivo.setSelected(consulta.getBoolean("ACTIVO"));
+                int idNivel = consulta.getInt("ID_NIVEL");                
+                for(int i = 0 ; i < modeloNiveles.getSize() ; i++){
+                    if(modeloNiveles.getElementAt(i).id == idNivel){
+                        cboNivel.setSelectedIndex(i);
+                        return;
+                    }
+                }
+            }                        
+        } catch (SQLException ex) {
+            Logger.getLogger(DialogoUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public static void nuevo(Frame parent, int idUsuarioActual, int nivelUsuario){
+        DialogoUsuario dialogo = new DialogoUsuario(
+                parent, 
+                true, 
+                NUEVO, 
+                idUsuarioActual,
+                nivelUsuario);
+        
+        dialogo.setVisible(true);
+        dialogo.dispose();
+    }
+    
+    public static void modificar(Frame parent, int idUsuarioActual, int nivelUsuario){
+        DialogoUsuario dialogo = new DialogoUsuario(
+                parent, 
+                true, 
+                MODIFICAR, 
+                idUsuarioActual,
+                nivelUsuario);
         
         dialogo.setVisible(true);
         dialogo.dispose();

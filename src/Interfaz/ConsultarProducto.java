@@ -23,12 +23,16 @@ import javax.swing.JOptionPane;
  */
 public class ConsultarProducto extends javax.swing.JDialog {
 
+    private int idUsuario = 0;
+    
     /**
      * Creates new form ConsultarProducto
      */
-    private ConsultarProducto(Frame parent, boolean modal) {
+    private ConsultarProducto(Frame parent, boolean modal, int idUsuario) {
         super(parent, modal);
         initComponents();
+        
+        this.idUsuario = idUsuario;                 
         
         setLocationRelativeTo(null);
     }
@@ -67,6 +71,16 @@ public class ConsultarProducto extends javax.swing.JDialog {
         });
 
         txtBuscarClave.setPlaceholder("Clave");
+        txtBuscarClave.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtBuscarClaveMouseClicked(evt);
+            }
+        });
+        txtBuscarClave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBuscarClaveActionPerformed(evt);
+            }
+        });
 
         txtClave.setPlaceholder("Clave");
 
@@ -140,19 +154,49 @@ public class ConsultarProducto extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        buscar();
+    }//GEN-LAST:event_btnBuscarActionPerformed
+
+    private void txtBuscarClaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscarClaveActionPerformed
+        buscar();
+    }//GEN-LAST:event_txtBuscarClaveActionPerformed
+
+    private void txtBuscarClaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtBuscarClaveMouseClicked
+        txtBuscarClave.setText(BuscarProducto.mostrar(null));
+    }//GEN-LAST:event_txtBuscarClaveMouseClicked
+
+    public static void mostrar(Frame parent, int idUsuario){
+        ConsultarProducto dialogo = new ConsultarProducto(parent, true, idUsuario);
+        
+        dialogo.setVisible(true);
+        dialogo.dispose();
+    }    
+
+    private void buscar(){
         try {
             String sql = "SELECT * FROM CONSULTA_PRODUCTO WHERE CLAVE='" + txtBuscarClave.getText() + "'";
-            
-            ResultSet consulta = SQLConnection.select(sql);
-            
+            String registrarConsulta = "INSERT INTO CONSULTAS(CLAVE_PRODUCTO, ID_USUARIO) "
+                    + "VALUES("
+                    + "'" + txtBuscarClave.getText() + "',"
+                    + idUsuario + ")";
+                        
+            ResultSet consulta = SQLConnection.select(sql);            
             if(consulta.next()){
-                txtClave.setText(consulta.getString("CLAVE"));
-                txtNombre.setText(consulta.getString("NOMBRE"));
-                txtCategoria.setText(consulta.getString("CATEGORIA"));
-                txtPrecio.setText("$"+consulta.getString("PRECIO"));
-                txtExistencia.setText(consulta.getString("EXISTENCIA") + " piezas");
-                lblImagen.setIcon(new ImageIcon(new ImageIcon(consulta.getString("IMAGEN"))
-                        .getImage().getScaledInstance(150, 150, Image.SCALE_DEFAULT)));
+                if(SQLConnection.update(registrarConsulta)){
+                    txtClave.setText(consulta.getString("CLAVE"));
+                    txtNombre.setText(consulta.getString("NOMBRE"));
+                    txtCategoria.setText(consulta.getString("CATEGORIA"));
+                    txtPrecio.setText("$"+consulta.getString("PRECIO"));
+                    txtExistencia.setText(consulta.getString("EXISTENCIA") + " piezas");
+                    lblImagen.setIcon(new ImageIcon(new ImageIcon(consulta.getString("IMAGEN"))
+                            .getImage().getScaledInstance(150, 150, Image.SCALE_DEFAULT)));
+                }else{
+                    JOptionPane.showMessageDialog(
+                        this, 
+                        "No se puede mostrar el artículo",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                }
             }else{
                 JOptionPane.showMessageDialog(
                         this, 
@@ -165,15 +209,8 @@ public class ConsultarProducto extends javax.swing.JDialog {
         }
         
         
-    }//GEN-LAST:event_btnBuscarActionPerformed
-
-    public static void mostrar(Frame parent){
-        ConsultarProducto dialogo = new ConsultarProducto(parent, true);
-        
-        dialogo.setVisible(true);
-        dialogo.dispose();
-    }    
-
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuscar;
     private javax.swing.ButtonGroup buttonGroup1;

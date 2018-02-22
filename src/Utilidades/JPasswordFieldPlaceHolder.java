@@ -6,6 +6,8 @@
 package Utilidades;
 
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JPasswordField;
@@ -76,6 +78,14 @@ public class JPasswordFieldPlaceHolder extends JPasswordField{
                     setCaretPosition(obtenerTextoInterno().length());
                 }
             }
+        });
+        addFocusListener(new FocusAdapter(){
+            
+            @Override
+            public void focusGained(FocusEvent evt){
+                setCaretPosition(obtenerTextoInterno().length());
+            }
+            
         });
     }
 

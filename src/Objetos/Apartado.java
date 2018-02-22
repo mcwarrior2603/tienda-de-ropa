@@ -10,22 +10,38 @@ package Objetos;
  * @author Raul
  */
 public class Apartado {
+
     public int folio;
     public int folioDeVenta;
+    public String claveProducto;
     public String nombre;
     public float precio;
     public float saldoPendiente;
+    public boolean cancelado;
+    public boolean entregado;
 
-    public Apartado(int folio, int folioDeVenta, String nombre, float precio, float saldoPendiente) {
+    public Apartado(int folio, 
+            int folioDeVenta, 
+            String claveProducto,
+            String nombre, 
+            float precio, 
+            float saldoPendiente, 
+            boolean cancelado, 
+            boolean entregado) {
         this.folio = folio;
-        this.folioDeVenta = folioDeVenta;
+        this.folioDeVenta = folioDeVenta;  
+        this.claveProducto = claveProducto;
         this.nombre = nombre;
         this.precio = precio;
         this.saldoPendiente = saldoPendiente;
+        this.cancelado = cancelado;
+        this.entregado = entregado;
     }
         
     @Override
     public String toString(){
-        return nombre;
+        return nombre  
+                + (cancelado ? " : Cancelado" : "") 
+                + (entregado ? " : Entregado" : "");
     }
 }

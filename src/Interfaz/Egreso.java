@@ -96,7 +96,7 @@ public class Egreso extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        txtMonto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("$#,##0.00"))));
+        txtMonto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
         txtMonto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtMontoActionPerformed(evt);
@@ -258,37 +258,34 @@ public class Egreso extends javax.swing.JDialog {
         String fecha = txtFecha.getText();
         int digitoValidador = Math.abs(r.nextInt())%1000000000;        
 
+        String sqlNivel = "SELECT ID_NIVEL FROM USUARIOS WHERE ID=" + idUsuarioActual;        
+        ResultSet consulta = SQLConnection.select(sqlNivel);
+        try {
+            consulta.next();
+            if(consulta.getInt("ID_NIVEL") < 2){
+                eliminar(folio);        
+                return;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         String ing = JOptionPane.showInputDialog(
             "Se requiere autorización para realizar esta acción\n"
             + "Proporcione los siguientes datos:\n"
             + "Folio:" + txtFolio.getText() + "\n"
-            + "Fecha:" + txtFecha.getText() + "\n"
+            + "Fecha:" + txtFecha.getText().substring(0, 10) + "\n"
             + "Usuario:" + idUsuarioActual + "\n"
             + "Número de validación:" + digitoValidador + "\n\n"
-            + "Ingrese el código de autorización:");
+            + "Ingrese el código de autorización:");                           
+        
         if(Seguridad.checkEliminarEgreso(
             folio,
             fecha,
             idUsuarioActual,
             digitoValidador,
             ing)){        
-        String sqlCancelar = "UPDATE EGRESOS SET CANCELADO=TRUE WHERE FOLIO=" + folio;        
-
-        if(!SQLConnection.update(sqlCancelar)){
-            JOptionPane.showMessageDialog(
-                this,
-                "No fue posible cancelar el ingreso",
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
-            SQLConnection.rollback();
-            return;
-        }
-        
-        JOptionPane.showMessageDialog(
-            this,
-            "¡Egreso cancelado!");
-        setVisible(false);
-        dispose();
+            eliminar(folio);
         }else{
             JOptionPane.showMessageDialog(
                 this,
@@ -367,9 +364,7 @@ public class Egreso extends javax.swing.JDialog {
     }
     
     public static void mostrar(JFrame parent, int idUsuarioActual, int folio){
-        Egreso egreso = new Egreso(parent, true, idUsuarioActual, VER, folio);
-        
-        egreso.btnEliminar.setEnabled(egreso.chkCancelado.isSelected());
+        Egreso egreso = new Egreso(parent, true, idUsuarioActual, VER, folio);                
         
         egreso.setVisible(true);
         egreso.dispose();
@@ -401,8 +396,7 @@ public class Egreso extends javax.swing.JDialog {
             Logger.getLogger(Egreso.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-        
-    
+            
     private void cargarEgreso(){
         String sql = "";
         
@@ -427,6 +421,26 @@ public class Egreso extends javax.swing.JDialog {
         } catch (SQLException ex) {
             Logger.getLogger(Egreso.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void eliminar(int folio){
+        String sqlCancelar = "UPDATE EGRESOS SET CANCELADO=TRUE WHERE FOLIO=" + folio;        
+
+        if(!SQLConnection.update(sqlCancelar)){
+            JOptionPane.showMessageDialog(
+                this,
+                "No fue posible cancelar el ingreso",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            SQLConnection.rollback();
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(
+            this,
+            "¡Egreso cancelado!");
+        setVisible(false);
+        dispose();
     }
     
     /**

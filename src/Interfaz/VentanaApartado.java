@@ -9,9 +9,12 @@ import BaseDeDatos.SQLConnection;
 import Objetos.Abono;
 import Objetos.Apartado;
 import Objetos.Cliente;
+import Utilidades.Fecha;
 import Utilidades.ManejoDeErrores;
+import Utilidades.Seguridad;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
@@ -29,8 +32,8 @@ public class VentanaApartado extends javax.swing.JFrame {
     private int folioActual = 0;
     private int subfolio = 0;
     
-    private DefaultComboBoxModel<Apartado> apartados = new DefaultComboBoxModel();   
-    private DefaultTableModel abonos = new DefaultTableModel(
+    private DefaultComboBoxModel<Apartado> listaApartados = new DefaultComboBoxModel();   
+    private DefaultTableModel modelAbonos = new DefaultTableModel(
             new Object[]{"Ticket", "Fecha", "Recibió", "Monto", "Cancelado"},
             0){
                 @Override
@@ -42,8 +45,10 @@ public class VentanaApartado extends javax.swing.JFrame {
     /**
      * Creates new form Apartado
      */
-    private VentanaApartado(int idUsuarioActual) {
+    public VentanaApartado(int idUsuarioActual) {
         initComponents();     
+        
+        setLocationRelativeTo(null);
         
         this.idUsuarioActual = idUsuarioActual;
     }   
@@ -52,7 +57,7 @@ public class VentanaApartado extends javax.swing.JFrame {
         initComponents();
         
         this.idUsuarioActual = idUsuarioActual;
-        this.subfolio = subfolio;                
+        this.subfolio = subfolio;                    
         
         cargarSubfolio();
     }
@@ -81,8 +86,10 @@ public class VentanaApartado extends javax.swing.JFrame {
         txtSaldo = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         txtFolioDeVenta = new javax.swing.JTextField();
+        btnEliminar = new javax.swing.JButton();
+        chkCancelado = new javax.swing.JCheckBox();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
         setResizable(false);
 
@@ -101,7 +108,7 @@ public class VentanaApartado extends javax.swing.JFrame {
             }
         });
 
-        cboApartados.setModel(apartados);
+        cboApartados.setModel(listaApartados);
         cboApartados.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cboApartadosItemStateChanged(evt);
@@ -114,7 +121,7 @@ public class VentanaApartado extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel3.setText("Abonos");
 
-        tableAbonos.setModel(abonos);
+        tableAbonos.setModel(modelAbonos);
         tableAbonos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tableAbonosMouseClicked(evt);
@@ -132,15 +139,31 @@ public class VentanaApartado extends javax.swing.JFrame {
 
         btnEntregar.setText("Entregar");
         btnEntregar.setEnabled(false);
+        btnEntregar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEntregarActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Saldo");
 
         txtSaldo.setEditable(false);
 
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel5.setText("Sub folio de venta");
+        jLabel5.setText("Folio De Venta");
 
         txtFolioDeVenta.setEditable(false);
+
+        btnEliminar.setText("Eliminar");
+        btnEliminar.setEnabled(false);
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
+
+        chkCancelado.setText("Cancelado");
+        chkCancelado.setEnabled(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -154,7 +177,11 @@ public class VentanaApartado extends javax.swing.JFrame {
                         .addComponent(btnAbonar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnEntregar)
+                        .addGap(18, 18, 18)
+                        .addComponent(chkCancelado)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnEliminar)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtSaldo, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -209,7 +236,9 @@ public class VentanaApartado extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnAbonar)
                         .addComponent(btnEntregar)
-                        .addComponent(jLabel4)))
+                        .addComponent(jLabel4)
+                        .addComponent(btnEliminar)
+                        .addComponent(chkCancelado)))
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
@@ -244,6 +273,119 @@ public class VentanaApartado extends javax.swing.JFrame {
         cargarApartado();
     }//GEN-LAST:event_tableAbonosMouseClicked
 
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        Random r = new Random(System.nanoTime());
+
+        Apartado temp = (Apartado) listaApartados.getSelectedItem();        
+        
+        String fecha = Fecha.now();
+        int digitoValidador = Math.abs(r.nextInt())%1000000000;        
+
+        String sqlNivel = "SELECT ID_NIVEL FROM USUARIOS WHERE ID=" + idUsuarioActual;        
+        ResultSet consulta = SQLConnection.select(sqlNivel);
+        try {
+            consulta.next();
+            if(consulta.getInt("ID_NIVEL") < 2){
+                eliminar(temp);        
+                return;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        String ing = JOptionPane.showInputDialog(
+            "Se requiere autorización para realizar esta acción\n"
+            + "Proporcione los siguientes datos:\n"
+            + "Folio:" + txtFolio.getText() + "\n"
+            + "Fecha:" + fecha + "\n"
+            + "Usuario:" + idUsuarioActual + "\n"
+            + "Número de validación:" + digitoValidador + "\n\n"
+            + "Ingrese el código de autorización:");
+        if(Seguridad.checkEliminarApartado(
+            temp.folio,
+            fecha,
+            idUsuarioActual,
+            digitoValidador,
+            ing)){        
+            eliminar(temp);
+        }else{
+            JOptionPane.showMessageDialog(
+                this,
+                "Código incorrecto",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void btnEntregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntregarActionPerformed
+        Apartado temp = (Apartado) listaApartados.getSelectedItem();
+        entregar(temp);
+        cargarClienteActual();
+    }//GEN-LAST:event_btnEntregarActionPerformed
+
+    private void entregar(Apartado temp){
+        String sqlEntregar = "UPDATE APARTADOS SET ENTREGADO=TRUE WHERE FOLIO=" + temp.folio;        
+        String updateInventario = "UPDATE PRODUCTOS "
+                + "SET EXISTENCIA=EXISTENCIA-1 "
+                + "WHERE CLAVE='" + temp.claveProducto + "'";
+        
+        SQLConnection.startTransaction();                
+        
+        if(!SQLConnection.update(sqlEntregar) 
+                || !SQLConnection.update(updateInventario)){
+            JOptionPane.showMessageDialog(
+                this,
+                "No fue posible registrar la entrega",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            SQLConnection.rollback();
+            return;
+        }                                                    
+        
+        SQLConnection.commit();
+        JOptionPane.showMessageDialog(
+            this,
+            "¡Producto entregado!");
+        cargarClienteActual();
+        
+    }
+    
+    private void eliminar(Apartado temp){
+        String sqlCancelar = "UPDATE APARTADOS SET CANCELADO=TRUE WHERE FOLIO=" + temp.folio;        
+        String updateInventario = "UPDATE PRODUCTOS "
+                + "SET EXISTENCIA=EXISTENCIA+1 "
+                + "WHERE CLAVE='" + temp.claveProducto + "'";
+        
+        SQLConnection.startTransaction();
+        
+        if(!SQLConnection.update(sqlCancelar)){
+            JOptionPane.showMessageDialog(
+                this,
+                "No fue posible cancelar el ingreso",
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+            SQLConnection.rollback();
+            return;
+        }                
+        
+        if(temp.entregado)
+            if(!SQLConnection.update(updateInventario)){
+                JOptionPane.showMessageDialog(
+                    this,
+                    "No fue posible cancelar el ingreso",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+                SQLConnection.rollback();
+                return;
+            }
+        
+        
+        JOptionPane.showMessageDialog(
+            this,
+            "¡Egreso cancelado!");
+        cargarClienteActual();
+    }
+    
     private void cargarSubfolio(){
         try {
             String sql = "SELECT * FROM BUSCAR_POR_SUBFOLIO WHERE SUBFOLIO=" + subfolio;
@@ -272,24 +414,27 @@ public class VentanaApartado extends javax.swing.JFrame {
                 sql = "SELECT * FROM APARTADOS_POR_CLIENTE WHERE ID_CLIENTE=" + idClienteActual;
                 consulta = SQLConnection.select(sql);
                 
-                apartados.removeAllElements(); 
+                listaApartados.removeAllElements(); 
                 txtPrecio.setText("");
                 txtSaldo.setText("");
                 txtFolio.setText("");
                 txtFolioDeVenta.setText("");
-                abonos.setRowCount(0);
+                modelAbonos.setRowCount(0);
                 btnAbonar.setEnabled(false);
                 btnEntregar.setEnabled(false);
                 for(int i = 0 ; consulta.next() ; i++) {
                     Apartado temp = new Apartado(
                             consulta.getInt("FOLIO"),
                             consulta.getInt("FOLIO_VENTA"),
+                            consulta.getString("CLAVE_PRODUCTO"),
                             consulta.getString("NOMBRE"),
                             consulta.getFloat("PRECIO"),
-                            consulta.getFloat("SALDO_PENDIENTE")
+                            consulta.getFloat("SALDO_PENDIENTE"),
+                            consulta.getBoolean("CANCELADO"),
+                            consulta.getBoolean("ENTREGADO")
                     );
                                                             
-                    apartados.addElement(temp);
+                    listaApartados.addElement(temp);
                     btnAbonar.setEnabled(true);
                     btnEntregar.setEnabled(true);
                     
@@ -298,7 +443,7 @@ public class VentanaApartado extends javax.swing.JFrame {
                     }
                 }
                 
-                cboApartadosItemStateChanged(null);
+                cargarApartado();
             }        
         } catch (SQLException ex) {
             Logger.getLogger(VentanaApartado.class.getName()).log(Level.SEVERE, null, ex);
@@ -308,33 +453,41 @@ public class VentanaApartado extends javax.swing.JFrame {
     private void cargarApartado(){
         String sql = "";
         try {
-            Apartado temp = (Apartado) apartados.getSelectedItem();
+            Apartado temp = (Apartado) listaApartados.getSelectedItem();
             
             if(temp == null)
-                return;
+                return;                        
+            
+            folioActual = temp.folio;
             
             txtFolio.setText(temp.folio + "");
             txtFolioDeVenta.setText(temp.folioDeVenta + "");
             txtPrecio.setText(temp.precio + "");
-            txtSaldo.setText(temp.saldoPendiente + "");                        
+            txtSaldo.setText(temp.saldoPendiente + "");   
+            chkCancelado.setSelected(temp.cancelado);
+            btnEliminar.setEnabled(!temp.cancelado);
+            btnEntregar.setEnabled(false);
+            btnAbonar.setEnabled(true);
             
-            if(temp.saldoPendiente == 0)
+            if(temp.saldoPendiente == 0 || temp.cancelado)
                 btnAbonar.setEnabled(false);            
+            if(temp.saldoPendiente == 0 && !temp.cancelado && !temp.entregado)
+                btnEntregar.setEnabled(true);
             
             sql = "SELECT * FROM ABONOS_APARTADOS WHERE FOLIO_APARTADO=" + temp.folio;
             ResultSet consulta = SQLConnection.select(sql);
             
-            abonos.setRowCount(0);
+            modelAbonos.setRowCount(0);
             while(consulta.next()){
                 
-                abonos.addRow(new Object[]{
+                modelAbonos.addRow(new Object[]{
                     consulta.getInt("FOLIO_TICKET"),
                     consulta.getString("FECHA"),
                     consulta.getString("USUARIO"),
                     consulta.getFloat("MONTO"),
                     consulta.getBoolean("CANCELADO")?"Si":"No"
-                });
-            }
+                });                
+            }              
         } catch (SQLException ex) {
             ManejoDeErrores.reportarError(ex, sql);
         }        
@@ -352,14 +505,27 @@ public class VentanaApartado extends javax.swing.JFrame {
                 ((Apartado)cboApartados.getSelectedItem()).nombre);
         
         if(folioIngreso != 0){
-            String sql = "INSERT INTO ABONOS("
-                    + "FOLIO_APARTADO,"
-                    + "FOLIO_TICKET)"
-                    + "VALUES("
-                    + folioActual + ","
-                    + folioIngreso + ")";
-            
-            valido = SQLConnection.update(sql);
+            try {
+                String sql = "INSERT INTO ABONOS("
+                        + "FOLIO_APARTADO,"
+                        + "FOLIO_TICKET)"
+                        + "VALUES("
+                        + folioActual + ","
+                        + folioIngreso + ")";
+                String getMonto = "SELECT MONTO FROM INGRESOS WHERE FOLIO=" + folioIngreso;
+                
+                ResultSet consulta = SQLConnection.select(getMonto);
+                consulta.next();
+                float monto = consulta.getFloat("MONTO");
+                
+                String actualizarTotal = "UPDATE APARTADOS "
+                        + "SET SALDO_PENDIENTE=SALDO_PENDIENTE-" + monto + " "
+                        + "WHERE FOLIO=" + folioActual;
+                
+                valido = SQLConnection.update(sql) && SQLConnection.update(actualizarTotal);
+            } catch (SQLException ex) {
+                Logger.getLogger(VentanaApartado.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         
         if(valido){
@@ -416,8 +582,10 @@ public class VentanaApartado extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAbonar;
+    private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnEntregar;
     private javax.swing.JComboBox cboApartados;
+    private javax.swing.JCheckBox chkCancelado;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

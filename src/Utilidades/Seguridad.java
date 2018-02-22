@@ -57,6 +57,46 @@ public class Seguridad {
         return hex.equals(autorizacion);    
     }
     
+    public static boolean checkEliminarApartado(int folio, 
+            String fecha, 
+            int idUsuario, 
+            int digitoValidacion,
+            String autorizacion){        
+        
+        Calendar c = Calendar.getInstance();                        
+        c.set(Calendar.YEAR, Integer.parseInt(fecha.substring(0, 4)));
+        c.set(Calendar.MONTH, Integer.parseInt(fecha.substring(5, 7)));
+        c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(fecha.substring(8, 10)));
+        
+        int fechaNumero = c.get(Calendar.YEAR) * c.get(Calendar.MONTH) * c.get(Calendar.DAY_OF_MONTH);
+        
+        int valor = Math.abs((folio * idUsuario * digitoValidacion / (fechaNumero * folio)) % digitoValidacion );
+        
+        String hex = Integer.toHexString(valor);                                
+        
+        return hex.equals(autorizacion);    
+    }
+    
+    public static boolean checkEliminarVenta(
+            int folio, 
+            String fecha, 
+            int idUsuario, 
+            int digitoValidacion,
+            String autorizacion){
+        Calendar c = Calendar.getInstance();                        
+        c.set(Calendar.YEAR, Integer.parseInt(fecha.substring(0, 4)));
+        c.set(Calendar.MONTH, Integer.parseInt(fecha.substring(5, 7)));
+        c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(fecha.substring(8, 10)));
+        
+        int fechaNumero = c.get(Calendar.YEAR) * c.get(Calendar.MONTH) * c.get(Calendar.DAY_OF_MONTH);
+        
+        int valor = Math.abs((folio * fechaNumero * digitoValidacion / (idUsuario * folio)) % digitoValidacion );
+        
+        String hex = Integer.toHexString(valor);                                
+        
+        return hex.equals(autorizacion);    
+    }
+    
     public static void main(String args[]){
         Random r = new Random(System.nanoTime()); 
 //        for(int i = 0 ; i < 100 ; i++)

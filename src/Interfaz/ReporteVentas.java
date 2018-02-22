@@ -21,7 +21,7 @@ public class ReporteVentas extends javax.swing.JFrame {
 
     private int idUsuarioActual = 0;
     private DefaultTableModel modeloVentas = new DefaultTableModel(
-            new Object[]{"Folio", "Fecha", "Usuario", "Total"},0){
+            new Object[]{"Folio", "Fecha", "Usuario", "Total", "Cancelado"},0){
                 @Override
                 public boolean isCellEditable(int row, int column){
                     return false;
@@ -66,7 +66,7 @@ public class ReporteVentas extends javax.swing.JFrame {
         rbtnHoy = new javax.swing.JRadioButton();
         jButton1 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         tableVentas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -186,7 +186,8 @@ public class ReporteVentas extends javax.swing.JFrame {
                     consulta.getString("FOLIO"),
                     consulta.getString("FECHA"),
                     consulta.getString("USUARIO"),
-                    consulta.getString("TOTAL")
+                    consulta.getString("TOTAL"),
+                    consulta.getBoolean("CANCELADO") ? "Si" : "No"
                 });
             }
         } catch (SQLException ex) {

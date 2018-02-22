@@ -29,7 +29,8 @@ public class Ingreso extends javax.swing.JDialog {
     private static final int NUEVO_CON_REFERENCIA = 3;
     
     private int idUsuarioActual;
-    private int folioActual;
+    private int folioActual = 0;
+    private int folioReferencia = 0;
     
     private int uso;
     
@@ -54,7 +55,10 @@ public class Ingreso extends javax.swing.JDialog {
         
         cargarParaNuevo();
         txtFecha.setText(Fecha.now());        
+        
+        setLocationRelativeTo(null);
     }
+    
     private Ingreso(
             java.awt.Frame parent, 
             boolean modal, 
@@ -65,15 +69,17 @@ public class Ingreso extends javax.swing.JDialog {
         super(parent, modal);
         
         this.idUsuarioActual = idUsuarioActual;
+        this.folioReferencia = folioReferencia;
         
         initComponents();
         
         btnEliminar.setEnabled(false);
-        btnAceptar.setEnabled(false);
+        btnAceptar.setEnabled(true);
         
         cargarParaNuevo();
         txtFecha.setText(Fecha.now());  
         txtFolioReferencia.setText(folioReferencia + "");                
+        setLocationRelativeTo(null);
     }
     
     private Ingreso(
@@ -89,13 +95,14 @@ public class Ingreso extends javax.swing.JDialog {
         
         initComponents();
         
-        btnEliminar.setEnabled(false);
-        btnAceptar.setEnabled(false);
-        txtMonto.setEditable(false);
-        txtDetalles.setEditable(false);
+        btnEliminar.setEnabled(true);
+        btnAceptar.setEnabled(true);
+        txtMonto.setEditable(true);
+        txtDetalles.setEditable(true);
         txtFolioReferencia.setEditable(false);                        
         
-        cargarIngreso();                
+        cargarIngreso();       
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -150,7 +157,7 @@ public class Ingreso extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N
         jLabel1.setText("Ingreso");
 
-        txtMonto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtMonto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
         txtMonto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtMontoActionPerformed(evt);
@@ -374,6 +381,19 @@ public class Ingreso extends javax.swing.JDialog {
         String fecha = txtFecha.getText();        
         int digitoValidador = Math.abs(r.nextInt())%1000000000;               
         
+        String sqlNivel = "SELECT ID_NIVEL FROM USUARIOS WHERE ID=" + idUsuarioActual;        
+        ResultSet consulta = SQLConnection.select(sqlNivel);
+        try {
+            consulta.next();
+            if(consulta.getInt("ID_NIVEL") < 2){
+                eliminar(folio);        
+                return;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
+        }       
+        
+        
         String ing = JOptionPane.showInputDialog(
                 "Se requiere autorización para realizar esta acción\n"
                         + "Proporcione los siguientes datos:\n"
@@ -381,44 +401,14 @@ public class Ingreso extends javax.swing.JDialog {
                         + "Fecha:" + txtFecha.getText() + "\n"
                         + "Usuario:" + idUsuarioActual + "\n"
                         + "Número de validación:" + digitoValidador + "\n\n"
-                        + "Ingrese el código de autorización:");                
+                        + "Ingrese el código de autorización:");                                 
         if(Seguridad.checkEliminarIngreso(
                 folio,
                 fecha, 
                 idUsuarioActual, 
                 digitoValidador, 
                 ing)){
-            SQLConnection.startTransaction();
-            String sqlCancelar = "UPDATE INGRESOS SET CANCELADO=TRUE WHERE FOLIO=" + folio;            
-            String sqlUpdateSaldo = "UPDATE APARTADOS "
-                    + "SET SALDO_PENDIENTE=SALDO_PENDIENTE+" + txtMonto.getText() + " "
-                    + "WHERE FOLIO=" + txtFolio.getText();
-            
-            if(!SQLConnection.update(sqlCancelar)){
-                JOptionPane.showMessageDialog(
-                        this,
-                        "No fue posible cancelar el ingreso",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                SQLConnection.rollback();
-                return;
-            }
-            if(cboTipo.getSelectedItem().toString().equals("ABONO"))
-                if(!SQLConnection.update(sqlUpdateSaldo)){
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "No fue posible cancelar el ingreso",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                SQLConnection.rollback();
-                return;
-                }            
-            SQLConnection.commit();
-            JOptionPane.showMessageDialog(
-                    this, 
-                    "¡Ingreso cancelado!");            
-            setVisible(false);
-            dispose();
+            eliminar(folio);
         }else{
             JOptionPane.showMessageDialog(
                         this,
@@ -439,13 +429,16 @@ public class Ingreso extends javax.swing.JDialog {
     
     public static int nuevoParaAbono(JFrame parent, int idUsuarioActual, 
             int folioApartado, String apartado){
-        Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO);
+        Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO_CON_REFERENCIA, folioApartado, 0);
         
         dialogo.txtFolioReferencia.setText(folioApartado + "");        
         dialogo.txtDetalles.setText("Apartado:" + apartado);
+        dialogo.cboTipo.setEnabled(false);
         
         dialogo.setVisible(true);
         dialogo.dispose();
+        
+        System.out.println(dialogo.folioActual);
         
         return dialogo.folioActual;
         
@@ -458,7 +451,7 @@ public class Ingreso extends javax.swing.JDialog {
         dialogo.txtMonto.setText(monto + "");
         dialogo.txtFolioReferencia.setText(folioApartado + "");        
         dialogo.txtDetalles.setText("Apartado:" + apartado);
-        
+        dialogo.cboTipo.setEnabled(false);        
         dialogo.txtMonto.setEditable(false);
         
         dialogo.setVisible(true);
@@ -552,6 +545,41 @@ public class Ingreso extends javax.swing.JDialog {
         } catch (SQLException ex) {
             Logger.getLogger(Ingreso.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void eliminar(int folio){
+        SQLConnection.startTransaction();
+        String sqlCancelar = "UPDATE INGRESOS SET CANCELADO=TRUE WHERE FOLIO=" + folio;
+        String sqlUpdateSaldo = "UPDATE APARTADOS "
+                + "SET SALDO_PENDIENTE=SALDO_PENDIENTE+" + txtMonto.getText() + " "
+                + "WHERE FOLIO=" + txtFolio.getText();
+
+        if (!SQLConnection.update(sqlCancelar)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No fue posible cancelar el ingreso",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            SQLConnection.rollback();
+            return;
+        }
+        if (cboTipo.getSelectedItem().toString().equals("ABONO")) {
+            if (!SQLConnection.update(sqlUpdateSaldo)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No fue posible cancelar el ingreso",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                SQLConnection.rollback();
+                return;
+            }
+        }
+        SQLConnection.commit();
+        JOptionPane.showMessageDialog(
+                this,
+                "¡Ingreso cancelado!");
+        setVisible(false);
+        dispose();
     }
     
     /**

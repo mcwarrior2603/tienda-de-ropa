@@ -10,7 +10,9 @@ import Interfaz.Menu.ItemSubmenu;
 import Interfaz.Menu.ModifiedFlowLayout;
 import Interfaz.Menu.PanelSubmenu;
 import Objetos.Producto;
+import Utilidades.Fecha;
 import Utilidades.JTextfieldPlaceHolder;
+import Utilidades.Seguridad;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -61,7 +64,7 @@ public class Main extends JFrame{
     private final JPanel panelTotal = new JPanel();
     private final JPanel panelBotones = new JPanel();
     private final JPanel panelFormasDePago = new JPanel();
-    private final JPanel panelListaVenta = new JPanel();
+    private final JPanel panelListaVenta = new JPanel();    
         
     private final JScrollPane scrollMenu = new JScrollPane();
     private final JScrollPane scrollVenta = new JScrollPane();
@@ -76,15 +79,43 @@ public class Main extends JFrame{
     private final JButton btnEfectivo = new JButton("Efectivo");
     private final JButton btnApartado = new JButton("Apartado");
     private final JButton btnTarjeta = new JButton("Tarjeta");    
+    private final JButton btnAperturar = new JButton("Aperturar caja");    
     
     private final JTable tableVenta = new JTable();        
     
+    private final PanelSubmenu menuArchivo = new PanelSubmenu("Menu", "/res/iconos/menu.png");
     private final PanelSubmenu menuProductos = new PanelSubmenu("Productos", "/res/iconos/productos.png");
+    private final PanelSubmenu menuCategorias = new PanelSubmenu("Categorias", "/res/iconos/categoria.png");
+    private final PanelSubmenu menuClientes = new PanelSubmenu("Clientes", "/res/iconos/clientes.png");
     private final PanelSubmenu menuUsuarios = new PanelSubmenu("Usuarios", "/res/iconos/usuarios.png");
+    private final PanelSubmenu menuTransacciones = new PanelSubmenu("Transacciones", "/res/iconos/transacciones.png");
     private final PanelSubmenu menuReportes = new PanelSubmenu("Reportes", "/res/iconos/reportes.png");
     private final PanelSubmenu menuApartados = new PanelSubmenu("Apartados", "/res/iconos/apartados.png");
     private final PanelSubmenu menuConsultar = new PanelSubmenu("Consultar", "/res/iconos/consultar.png");    
-    
+        
+    private final ItemSubmenu itemCancelarVenta = new ItemSubmenu("Cancelar", "/res/iconos/cancelar.png"){
+        @Override
+        public void click() {
+            cancelarVenta();
+        }        
+    };
+    private final ItemSubmenu itemCerrarSesion = new ItemSubmenu("Cerrar sesión", "/res/iconos/cerrar sesion.png"){
+        @Override
+        public void click() {
+            setVisible(false);
+            dispose();
+            
+            new Login().setVisible(true);
+        }        
+    };
+    private final ItemSubmenu itemSalir = new ItemSubmenu("Salir", "/res/iconos/salir.png"){
+        @Override
+        public void click() {
+            setVisible(false);
+            dispose();     
+            System.exit(0);
+        }        
+    };
     private final ItemSubmenu itemNuevoProducto = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png"){
         @Override
         public void click() {
@@ -98,16 +129,41 @@ public class Main extends JFrame{
             DialogoProducto.modificar(getThis());
         }
     };
+    private final ItemSubmenu itemNuevaCategoria = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png"){
+        @Override
+        public void click() {
+            Categorias.nuevo(getThis());
+        }        
+    };
+    private final ItemSubmenu itemNuevoCliente = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png") {
+
+        @Override
+        public void click() {
+            Clientes.nuevo(null);
+        }
+    };
+    private final ItemSubmenu itemModificarCliente = new ItemSubmenu("Modificar", "/res/iconos/modificar.png") {
+
+        @Override
+        public void click() {
+            int id = BuscarCliente.mostrar(getThis(), "Seleccione el usuario a modificar");
+            
+            if(id == 0)
+                return;
+            
+            Clientes.mostrar(getThis(), id);
+        }
+    };
     private final ItemSubmenu itemNuevoUsuario = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png") {
         @Override
         public void click() {
-            DialogoUsuario.nuevo(getThis(), idUsuario);
+            DialogoUsuario.nuevo(getThis(), idUsuario, nivelUsuario);
         }
     };
-    private final ItemSubmenu itemEliminarUsuario = new ItemSubmenu("Eliminar", "/res/iconos/eliminar.png") {
+    private final ItemSubmenu itemModificarUsuario = new ItemSubmenu("Modificar", "/res/iconos/modificar.png") {
         @Override
         public void click() {
-            System.out.println("Eliminar usuario");
+            DialogoUsuario.modificar(getThis(), idUsuario, nivelUsuario);
         }
     };
     private final ItemSubmenu itemIngresos = new ItemSubmenu("Ingresos", "/res/iconos/ingresos.png") {
@@ -135,18 +191,68 @@ public class Main extends JFrame{
             new ReporteVentas(idUsuario).setVisible(true);
         }
     };
+    private final ItemSubmenu itemInventario = new ItemSubmenu("Inventario", "/res/iconos/existencia.png") {
+        @Override
+        public void click() {
+            Inventario inventario = new Inventario();
+            inventario.setVisible(true);
+        }
+    };
+    private final ItemSubmenu itemCorteCaja = new ItemSubmenu("Corte de caja", "/res/iconos/corte de caja.png") {
+        @Override
+        public void click() {
+            new CorteCaja().setVisible(true);
+        }
+    };
+    private final ItemSubmenu itemReporteConsultas = new ItemSubmenu("Consultas", "/res/iconos/consultar.png") {
+        @Override
+        public void click() {
+            new Consultas().setVisible(true);
+        }
+    };
+    private final ItemSubmenu itemApartado = new ItemSubmenu("Consultar", "/res/iconos/consultar.png") {
+        @Override
+        public void click() {
+            VentanaApartado apartado = new VentanaApartado(idUsuario);
+            apartado.setVisible(true);
+        }
+    };
     private final ItemSubmenu itemPrecio = new ItemSubmenu("Precio", "/res/iconos/precio.png") {
         @Override
         public void click() {
-            ConsultarProducto.mostrar(getThis());
+            ConsultarProducto.mostrar(getThis(), idUsuario);
         }
     };
     private final ItemSubmenu itemExistencia = new ItemSubmenu("Existencia", "/res/iconos/existencia.png") {
         @Override
         public void click() {
-            System.out.println("Existencia");
+            JOptionPane.showMessageDialog(this, "Función aún no habilitada");
         }
-    };
+    };    
+    private final ItemSubmenu itemTransaccion = new ItemSubmenu("Transacciones", "/res/iconos/transacciones.png") {
+        @Override
+        public void click() {
+            ConsultarTransaccion.mostrar(getThis(), idUsuario);
+        }
+    };    
+    private final ItemSubmenu itemNuevoIngreso = new ItemSubmenu("Nuevo ingreso", "/res/iconos/ingresos.png") {
+        @Override
+        public void click() {
+            Ingreso.nuevo(getThis(), idUsuario);
+        }
+    };    
+    private final ItemSubmenu itemNuevoEgreso = new ItemSubmenu("Nuevo egreso", "/res/iconos/egresos.png") {
+        @Override
+        public void click() {
+            Egreso.nuevo(getThis(), idUsuario);
+        }
+    };    
+    private final ItemSubmenu itemNuevaEntrada = new ItemSubmenu("Entrada de mercancía", "/res/iconos/compras.png") {
+        @Override
+        public void click() {
+            EntradaMercancia.nuevo(getThis(), idUsuario);
+        }
+    };    
     
     
     //</editor-fold>
@@ -158,7 +264,9 @@ public class Main extends JFrame{
     private float porcentajeApartado = 0.2f;
     
     private int idUsuario = 1;
+    private int nivelUsuario;
     private int folioVentaActual = 0;
+    private int idClienteActual = 0;
     
     private ArrayList<Producto> listaProductos = new ArrayList();
     
@@ -172,19 +280,25 @@ public class Main extends JFrame{
     
     private float total = 0;
     
-    public Main(int idUsuario){
+    public Main(int idUsuario, int nivelUsuario){
         panelPrincipal = (JPanel) getContentPane();                
-                                     
-        init();        
+                       
+        this.idUsuario = idUsuario; 
+        this.nivelUsuario = nivelUsuario;   
         
-        this.idUsuario = idUsuario;                
-                
+        init();                                             
+        
         setVisible(true);
+        setResizable(false);
         
         folioVentaActual = createVenta();        
     }
     
     private void init(){
+        setMenu();
+        setVenta();
+        setDerecha();
+        
         panelPrincipal.setBackground(colorFondo);
         panelPrincipal.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         panelPrincipal.setLayout(new BorderLayout(15, 15));
@@ -194,10 +308,7 @@ public class Main extends JFrame{
         
         setExtendedState(MAXIMIZED_BOTH);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                
-        setMenu();
-        setVenta();
-        setDerecha();
+                        
     }
     
     private void setMenu(){
@@ -207,32 +318,57 @@ public class Main extends JFrame{
         scrollMenu.getViewport().setBackground(colorPaneles);
         panelMenu.setOpaque(false);
         
-        panelMenu.setLayout(new ModifiedFlowLayout(ModifiedFlowLayout.CENTER, 0, 1));                        
+        panelMenu.setLayout(new ModifiedFlowLayout()); 
         
         menuProductos.setOpaque(false);
         menuProductos.setBackground(Color.WHITE);
         menuUsuarios.setOpaque(false);
-        menuUsuarios.setBackground(Color.WHITE);
+        menuUsuarios.setBackground(Color.WHITE);         
         
-        scrollMenu.setViewportView(panelMenu);
-        panelMenu.setPreferredSize(new Dimension(100,0));
+        scrollMenu.setViewportView(panelMenu);        
+        scrollMenu.setPreferredSize(new Dimension(100, 0));
+        scrollMenu.getVerticalScrollBar().setUnitIncrement(15);
         
-        panelMenu.add(menuProductos);
-        panelMenu.add(menuUsuarios);
-        panelMenu.add(menuReportes);
-        panelMenu.add(menuApartados);
+        panelMenu.add(menuArchivo);
         panelMenu.add(menuConsultar);
+        panelMenu.add(menuTransacciones);        
+        if(nivelUsuario < 2)
+            panelMenu.add(menuProductos);
+        if(nivelUsuario < 2)
+            panelMenu.add(menuCategorias);        
+        panelMenu.add(menuClientes);
+                
+        if(nivelUsuario < 2)
+            panelMenu.add(menuReportes);
+        panelMenu.add(menuApartados);  
+        if(nivelUsuario < 2)
+            panelMenu.add(menuUsuarios);
         
+        menuArchivo.addItem(itemCancelarVenta);
+        menuArchivo.addItem(itemCerrarSesion);
+        menuArchivo.addItem(itemSalir);
         menuProductos.addItem(itemNuevoProducto);
         menuProductos.addItem(itemModificarProducto);
+        menuCategorias.addItem(itemNuevaCategoria);
+        menuClientes.addItem(itemNuevoCliente);
+        menuClientes.addItem(itemModificarCliente);
         menuUsuarios.addItem(itemNuevoUsuario);
-        menuUsuarios.addItem(itemEliminarUsuario);
+        menuUsuarios.addItem(itemModificarUsuario);
+        menuReportes.addItem(itemCorteCaja);
+        menuReportes.addItem(itemInventario);        
+        menuReportes.addItem(itemReporteConsultas);
         menuReportes.addItem(itemEgresos);
         menuReportes.addItem(itemIngresos);
         menuReportes.addItem(itemCompras);
-        menuReportes.addItem(itemVentas);
+        menuReportes.addItem(itemVentas);        
+        menuApartados.addItem(itemApartado);
+        menuTransacciones.addItem(itemNuevoIngreso);
+        menuTransacciones.addItem(itemNuevoEgreso);
+        if(nivelUsuario < 2)
+            menuTransacciones.addItem(itemNuevaEntrada);
         menuConsultar.addItem(itemPrecio);
         menuConsultar.addItem(itemExistencia);
+        menuConsultar.addItem(itemTransaccion);
     }
     
     private void setVenta(){
@@ -248,13 +384,13 @@ public class Main extends JFrame{
         panelVenta.setPreferredSize(new Dimension(
                 ((int)(this.getWidth() * 0.5)),
                 0
-        ));
+        ));                
         
         labelLogo.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width / 3, 150));
         labelLogo.setBackground(new Color(0x9090f9));
         labelLogo.setOpaque(false);                
         labelLogo.setIcon(new ImageIcon(new ImageIcon(
-                Main.class.getResource("/res/logo.png")).getImage().
+                "multimedia/logo.jpg").getImage().
                 getScaledInstance((int)(Toolkit.getDefaultToolkit().getScreenSize().width / 3), 150, Image.SCALE_DEFAULT)));
         
         tableVenta.setModel(modeloVenta);
@@ -267,7 +403,8 @@ public class Main extends JFrame{
         tableVenta.setRowHeight(30);   
         tableVenta.setFont(fuenteTabla);
                         
-        txtClave.setFont(fuenteTabla);        
+        txtClave.setFont(fuenteTabla);   
+        txtClave.setPlaceholder("Clave de producto");
         txtClave.addFocusListener(new FocusAdapter(){
             
             @Override
@@ -293,9 +430,43 @@ public class Main extends JFrame{
         
         panelListaVenta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         panelListaVenta.setLayout(new BorderLayout(5, 5));
-        panelListaVenta.add(scrollVenta, BorderLayout.CENTER);
-        panelListaVenta.add(txtClave, BorderLayout.SOUTH);
-        
+        panelListaVenta.add(scrollVenta, BorderLayout.CENTER);        
+        if(checkApertura(Fecha.hoy())){
+            panelListaVenta.add(txtClave, BorderLayout.SOUTH);
+            btnEfectivo.setEnabled(true);
+            btnApartado.setEnabled(true);
+            btnTarjeta.setEnabled(true);
+        }else{
+            panelListaVenta.add(btnAperturar, BorderLayout.SOUTH);
+            btnEfectivo.setEnabled(false);
+            btnApartado.setEnabled(false);
+            btnTarjeta.setEnabled(false);
+        }
+        btnAperturar.addActionListener(new ActionListener(){
+            
+            @Override
+            public void actionPerformed(ActionEvent evt){
+                float monto = Apertura.mostrar(getThis());
+                
+                if(registrarAperturaDeCaja(monto)){
+                    JOptionPane.showMessageDialog(
+                            getThis(),
+                            "Apertura registrada correctamente");
+                    panelListaVenta.remove(btnAperturar);
+                    panelListaVenta.add(txtClave, BorderLayout.SOUTH);
+                    panelListaVenta.updateUI();
+                    btnEfectivo.setEnabled(true);
+                    btnApartado.setEnabled(true);
+                    btnTarjeta.setEnabled(true);
+                }else{
+                    JOptionPane.showMessageDialog(
+                            getThis(),
+                            "No se pudo registrar apertura");
+                }
+            }
+            
+        });
+                        
         panelTotal.setOpaque(false);
         panelTotal.setLayout(new BorderLayout(5,5));
         panelTotal.add(txtTotal, BorderLayout.CENTER);
@@ -308,10 +479,10 @@ public class Main extends JFrame{
         txtTotal.setFont(new Font("Arial", Font.BOLD, 36));
         txtTotal.setHorizontalAlignment(JLabel.RIGHT);
         txtTotal.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        txtTotal.setEditable(false);
-        txtTotal.setText(total + "");
+        txtTotal.setEditable(false);        
         txtTotal.setFormatterFactory(new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat("#,##0.00"))));        
         txtTotal.updateUI();
+        setTotal(total);
         
         panelFormasDePago.setOpaque(false);
         panelFormasDePago.setLayout(new GridLayout(1, 3, 5, 5));
@@ -360,30 +531,40 @@ public class Main extends JFrame{
     }
     
     private int recuperarVenta(){
-        String sql = "SELECT * FROM VENTAS_PENDIENTES";
+        String sql = "SELECT * FROM DETALLES_VENTAS_PENDIENTES";
         int folioVenta = 0;
         
-        try {            
-            
+        try {                                    
             ResultSet consulta = SQLConnection.select(sql);
             
             if(consulta.next()){
-                folioVenta = consulta.getInt("FOLIO_VENTA");
+                folioVenta = consulta.getInt("FOLIO");
+                idClienteActual = consulta.getInt("ID_CLIENTE");                                
+                
                 String cargarVenta = "SELECT * FROM DETALLE_VENTA "
                         + "WHERE FOLIO_VENTA=" + folioVenta;
                 
                 consulta = SQLConnection.select(cargarVenta);
                 
                 while(consulta.next()){
+                    Producto temp = new Producto(
+                            consulta.getString("CLAVE"),
+                            consulta.getString("NOMBRE"),
+                            consulta.getFloat("PRECIO"),
+                            consulta.getInt("ASIGNACION")
+                    );
+                    
                     modeloVenta.addRow(new Object[]{
-                        consulta.getString("CLAVE"),
-                        consulta.getString("NOMBRE"),
-                        consulta.getFloat("PRECIO")
+                            temp.clave,
+                            temp.nombre,
+                            temp.precio
                     });
+                    
+                    listaProductos.add(temp);
                     
                     total += consulta.getFloat("PRECIO");
                 }
-                txtTotal.setText(total + "");
+                setTotal(total);
             }
         } catch (SQLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -396,7 +577,7 @@ public class Main extends JFrame{
         int folioVenta = 0;
         boolean valido = false;
           
-        folioVenta = recuperarVenta();
+        folioVenta = recuperarVenta();                
         
         if(folioVenta != 0)
             return folioVenta;        
@@ -410,7 +591,9 @@ public class Main extends JFrame{
                 + idUsuario + ","
                 + "'Pendiente',"
                 + "(SELECT ID FROM CLIENTES WHERE NOMBRE='PUBLICO' AND APELLIDO_PATERNO='GENERAL'),"
-                + 0 + ")";        
+                + 0 + ")";   
+        
+        idClienteActual = 0;
         
         SQLConnection.startTransaction();
         if (SQLConnection.update(insertVenta)){
@@ -434,8 +617,9 @@ public class Main extends JFrame{
         if(valido){
             SQLConnection.commit();
             modeloVenta.setRowCount(0);
+            listaProductos.clear();
             total = 0;
-            txtTotal.setText(total + "");
+            setTotal(total);
         }else 
             SQLConnection.rollback();
         return folioVenta;
@@ -466,7 +650,7 @@ public class Main extends JFrame{
         txtClave.setText("");        
 
         total += temp.precio;
-        txtTotal.setText(total + "");
+        setTotal(total);
         
     }
     
@@ -483,8 +667,12 @@ public class Main extends JFrame{
                 + folioVentaActual + ","
                 + "'" + nuevo.clave + "',"
                 + nuevo.precio + ")";
-                                            
-        if(SQLConnection.update(sql)){
+        String updateTotal = "UPDATE VENTAS SET "
+                + "TOTAL=" + total + " "
+                + "WHERE FOLIO=" + folioVentaActual;
+        
+        SQLConnection.startTransaction();
+        if(SQLConnection.update(sql) && SQLConnection.update(updateTotal)){
             try {
                 String selectID = "SELECT MAX(ID_ASIGNACION) AS ID FROM VENTAS_PRODUCTOS;";
                 
@@ -512,6 +700,12 @@ public class Main extends JFrame{
                 
         SQLConnection.startTransaction();
 
+        idClienteActual = BuscarCliente.mostrar(
+                this, 
+                "Seleccione el cliente que aparta");        
+        if(idClienteActual == 0)
+            return;
+        
         folioIngreso = Ingreso.nuevoParaVenta(getThis(), idUsuario, folioVentaActual, total);
         
         if (folioIngreso != 0) {
@@ -549,16 +743,16 @@ public class Main extends JFrame{
         
         SQLConnection.startTransaction();                
         
-        int idCliente = BuscarCliente.mostrar(
+        idClienteActual = BuscarCliente.mostrar(
                 this, 
                 "Seleccione el cliente que aparta");        
-        if(idCliente == 0)
+        if(idClienteActual == 0)
             return;
         
         for(int i = 0 ; i < listaProductos.size() && valido ; i++){
             int folioApartado = createApartados(
                     listaProductos.get(i), 
-                    idCliente);
+                    idClienteActual);
             
             valido = valido && (folioApartado != 0);            
         }
@@ -597,7 +791,7 @@ public class Main extends JFrame{
                     + ing.idAsignacion + ","
                     + idCliente + ","
                     + ing.precio + ","
-                    + ing.precio + ")";            
+                    + ing.precio * (1 - porcentajeApartado) + ")";            
             String getFolio = "SELECT MAX(FOLIO) AS FOLIO FROM APARTADOS";
             
             if(!SQLConnection.update(sqlBase))
@@ -636,6 +830,7 @@ public class Main extends JFrame{
         String sql = "UPDATE VENTAS SET "
                 + "FORMA_PAGO='" + formaDePago + "',"
                 + "ID_USUARIO=" + idUsuario + ", "
+                + "ID_CLIENTE=" + idClienteActual + ", "
                 + "FECHA=NOW(), "
                 + "TOTAL=" + total + " "
                 + "WHERE FOLIO=" + folioVentaActual;
@@ -643,6 +838,56 @@ public class Main extends JFrame{
                 + "WHERE FOLIO_VENTA=" + folioVentaActual;
         
         return SQLConnection.update(sql) && SQLConnection.update(deleteVentaPendiente);
+    }
+    
+    private void cancelarVenta(){
+        
+        String sql = "UPDATE VENTAS SET CANCELADO=TRUE WHERE FOLIO=" + folioVentaActual;
+        
+        SQLConnection.startTransaction();
+        if(updateVenta("Cancelado")){            
+            if(SQLConnection.update(sql)){
+                JOptionPane.showMessageDialog(
+                        this, 
+                        "Venta cancelada");
+                SQLConnection.commit();
+                folioVentaActual = createVenta();
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(
+                        this, 
+                        "No fue posible realizar la cancelación");
+        SQLConnection.rollback();
+        
+    }
+    
+    private boolean checkApertura(String date){
+        try {
+            String selectApertura = "SELECT * FROM APERTURAS_DE_CAJA WHERE FECHA='" + date + "'";
+            
+            ResultSet consulta = SQLConnection.select(selectApertura);
+            
+            return consulta.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+    
+    private boolean registrarAperturaDeCaja(Float monto){
+                        
+        String sql = "INSERT INTO APERTURAS_DE_CAJA"
+                + "(FECHA, MONTO) "
+                + "VALUES"
+                + "(NOW(), " + monto + ")";
+        
+        return SQLConnection.update(sql);        
+    }
+
+    private void setTotal(float total){
+        this.total = total;
+        txtTotal.setText("$" + total);
     }
     
     private Main getThis(){
@@ -666,32 +911,6 @@ public class Main extends JFrame{
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
-    }        
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        
-        new Main(1);
-    }
+    }            
     
 }

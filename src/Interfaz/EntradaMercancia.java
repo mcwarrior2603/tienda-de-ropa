@@ -345,7 +345,7 @@ public class EntradaMercancia extends javax.swing.JDialog {
                         .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel7)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 544, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnEliminar)
                         .addGap(142, 142, 142)
@@ -545,11 +545,15 @@ public class EntradaMercancia extends javax.swing.JDialog {
     }//GEN-LAST:event_tableProductosMouseClicked
 
     private void btnEgresoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEgresoActionPerformed
-                
+        Egreso.mostrar(null, idUsuarioActual, folioEgreso);
     }//GEN-LAST:event_btnEgresoActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        String deleteCompra = "UPDATE COMPRAS SET CANCELADO=TRUE WHERE FOLIO=" + folioCompra;        
+        eliminar();        
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void eliminar(){
+        String deleteCompra = "UPDATE COMPRAS SET CANCELADO=TRUE WHERE FOLIO=" + folioCompra;                
         
         SQLConnection.startTransaction();
         
@@ -568,8 +572,8 @@ public class EntradaMercancia extends javax.swing.JDialog {
             setVisible(true);
             dispose();
         }
-    }//GEN-LAST:event_btnEliminarActionPerformed
-
+    }
+    
     private boolean actualizarExistencias(){
         
         for(int i = 0 ; i < modelProductos.getRowCount() ; i++){
@@ -604,7 +608,8 @@ public class EntradaMercancia extends javax.swing.JDialog {
         dialogo.txtCostoTotal.setEnabled(false);
         dialogo.txtProducto.setEnabled(false);
         
-        dialogo.btnEliminar.setEnabled(dialogo.chkCancelado.isSelected());
+        dialogo.btnEliminar.setEnabled(!dialogo.chkCancelado.isSelected());
+        dialogo.btnEgreso.setEnabled(true);
         
         dialogo.setVisible(true);
         dialogo.dispose();

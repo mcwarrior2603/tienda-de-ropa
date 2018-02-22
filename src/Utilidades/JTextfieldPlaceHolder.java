@@ -2,6 +2,8 @@ package Utilidades;
 
 import com.sun.javafx.application.PlatformImpl;
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JTextField;
@@ -71,6 +73,14 @@ public class JTextfieldPlaceHolder extends JTextField {
                     setCaretPosition(obtenerTextoInterno().length());
                 }
             }
+        });
+        addFocusListener(new FocusAdapter(){
+            
+            @Override
+            public void focusGained(FocusEvent evt){
+                setCaretPosition(obtenerTextoInterno().length());
+            }
+            
         });
     }
 
