@@ -67,8 +67,14 @@ public class BuscarProducto extends javax.swing.JDialog {
         jLabel1.setText("Buscar Producto");
 
         txtNombre.setPlaceholder("nombre");
+        txtNombre.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNombreActionPerformed(evt);
+            }
+        });
 
         jButton1.setText("Buscar");
+        jButton1.setPreferredSize(new java.awt.Dimension(75, 23));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -115,8 +121,8 @@ public class BuscarProducto extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, 377, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1)
-                        .addGap(0, 153, Short.MAX_VALUE))
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 143, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -133,7 +139,7 @@ public class BuscarProducto extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 416, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -143,29 +149,7 @@ public class BuscarProducto extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String busqueda = txtNombre.getText().trim();
-        String sql = "SELECT * FROM INVENTARIO WHERE INSTR(NOMBRE, '"
-        + busqueda + "')>0;";
-
-        ResultSet res = SQLConnection.select(sql);
-
-        if(res==null)
-        return;
-
-        try {
-            modelProductos.setRowCount(0);
-            while(res.next()){
-                modelProductos.addRow(
-                    new Object[]{
-                        res.getString("CLAVE"),
-                        res.getString("NOMBRE"),
-                        res.getBoolean("NUEVO") ? "Si" : "No",
-                        res.getString("CATEGORIA"),                        
-                    });
-                }
-            } catch (SQLException ex) {
-                ManejoDeErrores.reportarError(ex);
-            }
+       buscarProducto();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void tableProductosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableProductosMouseClicked
@@ -179,6 +163,35 @@ public class BuscarProducto extends javax.swing.JDialog {
         setVisible(false);
     }//GEN-LAST:event_tableProductosMouseClicked
 
+    private void txtNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNombreActionPerformed
+        buscarProducto();
+    }//GEN-LAST:event_txtNombreActionPerformed
+
+    private void buscarProducto(){
+         String busqueda = txtNombre.getText().trim();
+        String sql = "SELECT * FROM INVENTARIO WHERE INSTR(NOMBRE, '"
+                + busqueda + "')>0;";
+
+        ResultSet res = SQLConnection.select(sql);
+
+        if (res == null) 
+            return;
+        
+        try {
+            modelProductos.setRowCount(0);
+            while (res.next()) {
+                modelProductos.addRow(
+                        new Object[]{
+                            res.getString("CLAVE"),
+                            res.getString("NOMBRE"),
+                            res.getBoolean("NUEVO") ? "Si" : "No",
+                            res.getString("CATEGORIA"),});
+            }
+        } catch (SQLException ex) {
+            ManejoDeErrores.reportarError(ex);
+        }
+    }
+    
     public static String mostrar(JFrame parent){
         BuscarProducto dialogo = new BuscarProducto(parent, true);
         dialogo.setVisible(true);

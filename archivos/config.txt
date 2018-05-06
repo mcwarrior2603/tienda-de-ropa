@@ -1,0 +1,15 @@
+77
+77
+255
+217
+217
+217
+77
+77
+255
+E:\Usuario\Documents\Programación\Punto De Venta Tienda De Ropa\multimedia\logo.jpg
+false
+30.0
+localhost
+3306
+TIENDA_DE_ROPA

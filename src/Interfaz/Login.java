@@ -26,9 +26,11 @@ public class Login extends javax.swing.JFrame {
     public Login() {                
         initComponents();
         
+        Configuracion.cargarConfiguracion();
+        
         setLocationRelativeTo(null);
         
-        lblLogo.setIcon(new ImageIcon(new ImageIcon("multimedia/logo.jpg")
+        lblLogo.setIcon(new ImageIcon(new ImageIcon(Configuracion.rutaLogo)
                 .getImage().getScaledInstance(400, 200, Image.SCALE_SMOOTH)));
     }
 
@@ -76,6 +78,7 @@ public class Login extends javax.swing.JFrame {
         lblInfo.setPreferredSize(new java.awt.Dimension(100, 100));
 
         jButton1.setText("Acceder");
+        jButton1.setPreferredSize(new java.awt.Dimension(75, 23));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -92,7 +95,7 @@ public class Login extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1))
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(txtUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)

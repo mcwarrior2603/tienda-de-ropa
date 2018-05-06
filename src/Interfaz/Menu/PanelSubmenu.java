@@ -5,6 +5,7 @@
  */
 package Interfaz.Menu;
 
+import com.sun.javafx.scene.control.skin.LabeledText;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,8 +43,11 @@ public class PanelSubmenu extends JLayeredPane{
     
     private static int heightLabel = 15;
     
+    private boolean isActive = true;
+    
     public PanelSubmenu(String text, String urlIcono){
         setSize(width, height);       
+        setToolTipText("Sin apertura de caja registrada");
         
         labelMenu.setText(text);
         labelIcon.setIcon(new ImageIcon(
@@ -75,6 +79,8 @@ public class PanelSubmenu extends JLayeredPane{
         glassPane.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseEntered(MouseEvent ev){
+                if(!isActive)
+                    return;
                 panelFondo.setBackground(fondo);
                 panelFondo.setOpaque(true);
                 setSize(width, items.size() * ItemSubmenu.height + height + 10);                                                                
@@ -124,4 +130,21 @@ public class PanelSubmenu extends JLayeredPane{
         return this;
     }
     
+    public void setActive(boolean isActive){
+        this.isActive = isActive;
+        if(!isActive){
+            glassPane.setToolTipText("Sin apertura de caja registrada");            
+        }else{
+            glassPane.setToolTipText("");            
+        }
+        
+    }
+    
+    public boolean getActive(){
+        return this.isActive;
+    }
+
+    public static void setFondo(Color fondo) {
+        PanelSubmenu.fondo = fondo;
+    }        
 }

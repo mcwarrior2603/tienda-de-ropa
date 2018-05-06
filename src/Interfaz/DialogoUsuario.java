@@ -26,6 +26,7 @@ public class DialogoUsuario extends javax.swing.JDialog {
 
     public static final int NUEVO = 1;
     public static final int MODIFICAR = 2;
+    public static final int MODIFICAR_ACTUAL = 3;
     
     private int uso = 0;
     private int idUsuarioActual = 0;
@@ -107,6 +108,7 @@ public class DialogoUsuario extends javax.swing.JDialog {
         });
 
         jButton2.setText("Guardar");
+        jButton2.setPreferredSize(new java.awt.Dimension(75, 23));
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -132,11 +134,11 @@ public class DialogoUsuario extends javax.swing.JDialog {
                                 .addGap(51, 51, 51)
                                 .addComponent(jButton1)
                                 .addGap(18, 18, 18)
-                                .addComponent(jButton2))
-                            .addComponent(cboNivel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtConfirmarContrasenia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtContrasenia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(txtUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cboNivel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblCheck, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1)
@@ -165,7 +167,7 @@ public class DialogoUsuario extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkActivo)
                     .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -194,7 +196,7 @@ public class DialogoUsuario extends javax.swing.JDialog {
             }else{
                 JOptionPane.showMessageDialog(this, "No fue posible crear el usuario");
             }
-        }else if(uso == MODIFICAR){
+        }else if(uso == MODIFICAR || uso == MODIFICAR_ACTUAL){
             String sql = "UPDATE USUARIOS SET "
                     + "NOMBRE='" + txtUsuario.getText() + "',"
                     + "CONTRASENIA='" + BCrypt.hashpw(txtContrasenia.getText(), BCrypt.gensalt()) + "',"
@@ -213,7 +215,7 @@ public class DialogoUsuario extends javax.swing.JDialog {
 
     private void txtUsuarioFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUsuarioFocusLost
         try {
-            if(txtUsuario.getText().trim().isEmpty())
+            if(txtUsuario.getText().trim().isEmpty() || uso == MODIFICAR_ACTUAL)
                 return;
             String sql = "SELECT ID, NOMBRE, ID_NIVEL FROM USUARIOS WHERE NOMBRE='" + txtUsuario.getText().trim() + "'";
             
@@ -266,6 +268,15 @@ public class DialogoUsuario extends javax.swing.JDialog {
             ResultSet consulta = SQLConnection.select(sqlNivel);
             
             if(consulta.next()){
+                
+                if(uso == MODIFICAR_ACTUAL){
+                    modeloNiveles.addElement(new NivelesCliente(
+                            consulta.getInt("ID_NIVEL"),
+                            consulta.getString("NIVEL")
+                    ));                    
+                    return;
+                }
+                
                 int nivel = consulta.getInt("ID_NIVEL");
                 String sql = "SELECT * FROM NIVELES_USUARIO WHERE ID>" + nivel;
                 
@@ -289,7 +300,8 @@ public class DialogoUsuario extends javax.swing.JDialog {
                                     
             ResultSet consulta = SQLConnection.select(sql);
             
-            if(consulta.next()){                
+            if(consulta.next()){  
+                txtUsuario.setText(consulta.getString("NOMBRE"));
                 chkActivo.setSelected(consulta.getBoolean("ACTIVO"));
                 int idNivel = consulta.getInt("ID_NIVEL");                
                 for(int i = 0 ; i < modeloNiveles.getSize() ; i++){
@@ -323,6 +335,24 @@ public class DialogoUsuario extends javax.swing.JDialog {
                 MODIFICAR, 
                 idUsuarioActual,
                 nivelUsuario);
+        
+        dialogo.setVisible(true);
+        dialogo.dispose();
+    }
+    
+    public static void modificarUsuarioActual(Frame parent, int idUsuarioActual, int nivelUsuario){
+        DialogoUsuario dialogo = new DialogoUsuario(
+                parent, 
+                true, 
+                MODIFICAR_ACTUAL, 
+                idUsuarioActual,
+                nivelUsuario);
+        
+        dialogo.txtUsuario.setEditable(false);
+        dialogo.cboNivel.setEnabled(false);
+        dialogo.chkActivo.setEnabled(false);
+        
+        dialogo.cargarUsuario(idUsuarioActual);
         
         dialogo.setVisible(true);
         dialogo.dispose();

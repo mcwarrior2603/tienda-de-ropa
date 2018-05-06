@@ -5,6 +5,16 @@
  */
 package Interfaz;
 
+import Interfaz.Reportes.Consultas;
+import Interfaz.Transacciones.Ingreso;
+import Interfaz.Transacciones.Egreso;
+import Interfaz.Transacciones.EntradaMercancia;
+import Interfaz.Reportes.Inventario;
+import Interfaz.Reportes.ReporteIngresos;
+import Interfaz.Reportes.ReporteEgresos;
+import Interfaz.Reportes.ReporteVentas;
+import Interfaz.Reportes.CorteCaja;
+import Interfaz.Reportes.ReporteEntradas;
 import BaseDeDatos.SQLConnection;
 import Interfaz.Menu.ItemSubmenu;
 import Interfaz.Menu.ModifiedFlowLayout;
@@ -108,6 +118,12 @@ public class Main extends JFrame{
             new Login().setVisible(true);
         }        
     };
+    private final ItemSubmenu itemAjustes = new ItemSubmenu("Ajustes", "/res/iconos/ajustes.png"){
+        @Override
+        public void click() {
+            new Ajustes(getThis()).setVisible(true);
+        }        
+    };
     private final ItemSubmenu itemSalir = new ItemSubmenu("Salir", "/res/iconos/salir.png"){
         @Override
         public void click() {
@@ -164,6 +180,12 @@ public class Main extends JFrame{
         @Override
         public void click() {
             DialogoUsuario.modificar(getThis(), idUsuario, nivelUsuario);
+        }
+    };
+    private final ItemSubmenu itemModificarUsuarioActual = new ItemSubmenu("Modificar Actual", "/res/iconos/usuario actual.png") {
+        @Override
+        public void click() {
+            DialogoUsuario.modificarUsuarioActual(getThis(), idUsuario, nivelUsuario);
         }
     };
     private final ItemSubmenu itemIngresos = new ItemSubmenu("Ingresos", "/res/iconos/ingresos.png") {
@@ -223,7 +245,7 @@ public class Main extends JFrame{
             ConsultarProducto.mostrar(getThis(), idUsuario);
         }
     };
-    private final ItemSubmenu itemExistencia = new ItemSubmenu("Existencia", "/res/iconos/existencia.png") {
+    private final ItemSubmenu itemExterno = new ItemSubmenu("Externo", "/res/iconos/existencia.png") {
         @Override
         public void click() {
             JOptionPane.showMessageDialog(this, "Función aún no habilitada");
@@ -257,16 +279,16 @@ public class Main extends JFrame{
     
     //</editor-fold>
         
-    private final Font fuenteTabla = new Font("Arial", Font.BOLD, 15);
-    private Color colorFondo = new Color(0x4d4dff);
-    private Color colorPaneles = new Color(0xd9d9d9);
+    private final Font fuenteTabla = new Font("Arial", Font.BOLD, 15);    
     
-    private float porcentajeApartado = 0.2f;
+    private float porcentajeApartado = 0.3f;
     
     private int idUsuario = 1;
     private int nivelUsuario;
     private int folioVentaActual = 0;
     private int idClienteActual = 0;
+    
+    private boolean cajaAbierta = false;
     
     private ArrayList<Producto> listaProductos = new ArrayList();
     
@@ -299,7 +321,7 @@ public class Main extends JFrame{
         setVenta();
         setDerecha();
         
-        panelPrincipal.setBackground(colorFondo);
+        panelPrincipal.setBackground(Configuracion.colorFondo);
         panelPrincipal.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         panelPrincipal.setLayout(new BorderLayout(15, 15));
         panelPrincipal.add(scrollMenu, BorderLayout.WEST);
@@ -313,9 +335,9 @@ public class Main extends JFrame{
     
     private void setMenu(){
         
-        PanelSubmenu.fondo = new Color(0x4d, 0x4d, 0xff, 0x88);
+        PanelSubmenu.setFondo(Configuracion.colorMenu);
         
-        scrollMenu.getViewport().setBackground(colorPaneles);
+        scrollMenu.getViewport().setBackground(Configuracion.colorPaneles);
         panelMenu.setOpaque(false);
         
         panelMenu.setLayout(new ModifiedFlowLayout()); 
@@ -337,15 +359,17 @@ public class Main extends JFrame{
         if(nivelUsuario < 2)
             panelMenu.add(menuCategorias);        
         panelMenu.add(menuClientes);
-                
-        if(nivelUsuario < 2)
-            panelMenu.add(menuReportes);
+                        
+        panelMenu.add(menuReportes);
         panelMenu.add(menuApartados);  
         if(nivelUsuario < 2)
             panelMenu.add(menuUsuarios);
         
         menuArchivo.addItem(itemCancelarVenta);
         menuArchivo.addItem(itemCerrarSesion);
+        if(nivelUsuario < 2){
+            menuArchivo.addItem(itemAjustes);        
+        }
         menuArchivo.addItem(itemSalir);
         menuProductos.addItem(itemNuevoProducto);
         menuProductos.addItem(itemModificarProducto);
@@ -354,26 +378,29 @@ public class Main extends JFrame{
         menuClientes.addItem(itemModificarCliente);
         menuUsuarios.addItem(itemNuevoUsuario);
         menuUsuarios.addItem(itemModificarUsuario);
+        menuUsuarios.addItem(itemModificarUsuarioActual);
         menuReportes.addItem(itemCorteCaja);
-        menuReportes.addItem(itemInventario);        
-        menuReportes.addItem(itemReporteConsultas);
-        menuReportes.addItem(itemEgresos);
-        menuReportes.addItem(itemIngresos);
-        menuReportes.addItem(itemCompras);
-        menuReportes.addItem(itemVentas);        
+        if(nivelUsuario < 2){
+            menuReportes.addItem(itemInventario);        
+            menuReportes.addItem(itemReporteConsultas);
+            menuReportes.addItem(itemEgresos);
+            menuReportes.addItem(itemIngresos);
+            menuReportes.addItem(itemCompras);
+            menuReportes.addItem(itemVentas);        
+        }
         menuApartados.addItem(itemApartado);
         menuTransacciones.addItem(itemNuevoIngreso);
         menuTransacciones.addItem(itemNuevoEgreso);
         if(nivelUsuario < 2)
             menuTransacciones.addItem(itemNuevaEntrada);
         menuConsultar.addItem(itemPrecio);
-        menuConsultar.addItem(itemExistencia);
+        menuConsultar.addItem(itemExterno);
         menuConsultar.addItem(itemTransaccion);
     }
     
     private void setVenta(){
         
-        panelVenta.setBackground(colorPaneles);
+        panelVenta.setBackground(Configuracion.colorPaneles);
         panelVenta.setLayout(new BorderLayout(10, 10));
         panelVenta.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
@@ -388,9 +415,10 @@ public class Main extends JFrame{
         
         labelLogo.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width / 3, 150));
         labelLogo.setBackground(new Color(0x9090f9));
-        labelLogo.setOpaque(false);                
+        labelLogo.setOpaque(false);  
+        labelLogo.setHorizontalAlignment(JLabel.CENTER);
         labelLogo.setIcon(new ImageIcon(new ImageIcon(
-                "multimedia/logo.jpg").getImage().
+                Configuracion.rutaLogo).getImage().
                 getScaledInstance((int)(Toolkit.getDefaultToolkit().getScreenSize().width / 3), 150, Image.SCALE_DEFAULT)));
         
         tableVenta.setModel(modeloVenta);
@@ -435,7 +463,7 @@ public class Main extends JFrame{
             panelListaVenta.add(txtClave, BorderLayout.SOUTH);
             btnEfectivo.setEnabled(true);
             btnApartado.setEnabled(true);
-            btnTarjeta.setEnabled(true);
+            btnTarjeta.setEnabled(false);
         }else{
             panelListaVenta.add(btnAperturar, BorderLayout.SOUTH);
             btnEfectivo.setEnabled(false);
@@ -510,7 +538,7 @@ public class Main extends JFrame{
     
     private void setDerecha(){
        
-        panelDerecho.setBackground(colorPaneles);
+        panelDerecho.setBackground(Configuracion.colorPaneles);
         panelDerecho.setLayout(new BorderLayout(10, 10));
         panelDerecho.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelDerecho.add(panelPublicidad, BorderLayout.NORTH);
@@ -702,7 +730,7 @@ public class Main extends JFrame{
 
         idClienteActual = BuscarCliente.mostrar(
                 this, 
-                "Seleccione el cliente que aparta");        
+                "Seleccione el cliente que compra");        
         if(idClienteActual == 0)
             return;
         
@@ -716,8 +744,19 @@ public class Main extends JFrame{
                         + "FOLIO_INGRESO) "
                         + "VALUES("
                         + folioVentaActual + ","
-                        + folioIngreso + ")";
-                if(SQLConnection.update(sqlPago) && updateVenta("Efectivo"))
+                        + folioIngreso + ")";       
+                
+                boolean existenciasActualizadas = true;                           
+                String updateExistencia = "UPDATE PRODUCTOS SET EXISTENCIA=EXISTENCIA-1 "
+                        + "WHERE CLAVE='";
+                for(int i = 0 ; i < listaProductos.size() && existenciasActualizadas ; i++){
+                    existenciasActualizadas = SQLConnection.update(
+                            updateExistencia + listaProductos.get(i).clave + "'");
+                }
+                
+                if(SQLConnection.update(sqlPago) 
+                        && updateVenta("Efectivo") 
+                        && existenciasActualizadas)
                     valido = true;
             }
         }
@@ -835,12 +874,15 @@ public class Main extends JFrame{
                 + "TOTAL=" + total + " "
                 + "WHERE FOLIO=" + folioVentaActual;
         String deleteVentaPendiente = "DELETE FROM VENTAS_PENDIENTES "
-                + "WHERE FOLIO_VENTA=" + folioVentaActual;
+                + "WHERE FOLIO_VENTA=" + folioVentaActual;        
         
         return SQLConnection.update(sql) && SQLConnection.update(deleteVentaPendiente);
     }
     
     private void cancelarVenta(){
+        
+        if(!cajaAbierta)
+            return;
         
         String sql = "UPDATE VENTAS SET CANCELADO=TRUE WHERE FOLIO=" + folioVentaActual;
         
@@ -868,7 +910,9 @@ public class Main extends JFrame{
             
             ResultSet consulta = SQLConnection.select(selectApertura);
             
-            return consulta.next();
+            cajaAbierta = consulta.next();
+            menuTransacciones.setActive(cajaAbierta);
+            return cajaAbierta;
         } catch (SQLException ex) {
             Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -882,7 +926,11 @@ public class Main extends JFrame{
                 + "VALUES"
                 + "(NOW(), " + monto + ")";
         
-        return SQLConnection.update(sql);        
+        boolean registroCorrecto = SQLConnection.update(sql);       
+        
+        menuTransacciones.setActive(registroCorrecto);
+        cajaAbierta = registroCorrecto;
+        return registroCorrecto;
     }
 
     private void setTotal(float total){
@@ -912,5 +960,9 @@ public class Main extends JFrame{
         }
         return null;
     }            
+    
+    public void cargarConfiguracion(){
+        
+    }
     
 }

@@ -1,5 +1,6 @@
 package BaseDeDatos;
 
+import Interfaz.Configuracion;
 import Utilidades.ManejoDeErrores;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -54,39 +55,12 @@ public class SQLConnection {
     private SQLConnection(){}
             
     /**
-     * Método que carga la configuración de conexión al servidor (dirección
-     * del servidor, puerto y nombre de la base de datos) desde el archivo 
-     * en que se encuentra.
-     * @return true si fue posible cargar la información sin ninún fallo,
-     * false en caso contrario.
+     * Obtiene la configuración de conexión desde la clase clase Conexión
      */
-    private static boolean cargarConfiguracion(){
-        BufferedReader reader;
-        
-        try {
-            reader = new BufferedReader(new FileReader("archivos/database.txt"));
-            
-            host = reader.readLine();
-            port = reader.readLine();
-            dbName = reader.readLine();
-            
-            return true;           
-            
-        } catch (FileNotFoundException ex) {
-            JOptionPane.showMessageDialog(
-                    null, 
-                    "No se encuentra el archivo de información\n "
-                            + "del servidor",
-                    "Archivo de servidor: inexistente",
-                    JOptionPane.ERROR_MESSAGE);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(
-                    null, 
-                    "El archivo de configuración de servidor no es válido", 
-                    "Archivo de servidor: no válido", 
-                    JOptionPane.ERROR_MESSAGE);
-        }
-        return false;
+    private static void cargarConfiguracion(){                                    
+        host = Configuracion.dbHost;
+        port = Configuracion.dbPort;
+        dbName = Configuracion.dbName;                       
     }
     
     private static synchronized boolean conectar(){

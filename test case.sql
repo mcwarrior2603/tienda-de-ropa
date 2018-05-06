@@ -30,7 +30,7 @@ VALUES
 
 INSERT INTO CLIENTES(NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO1, TELEFONO2)
 VALUES('Raul', 'Mendez', 'Grado', '6491139249', ''),
-		('Adrian', 'Fernandez', 'Navarro', '6271338095',''),
+		('Adrian', 'Fernandez', 'Navarro', '6271338095','');
 		
 
 INSERT INTO APERTURAS_DE_CAJA(FECHA, MONTO) VALUES(NOW(), 200);
