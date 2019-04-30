@@ -87,7 +87,7 @@ public class Main extends JFrame{
     private final JLabel labelPublicidad = new JLabel();
     
     private final JButton btnEfectivo = new JButton("Efectivo");
-    private final JButton btnApartado = new JButton("Apartado");
+    private final JButton btnApartado = new JButton("Crédito");
     private final JButton btnTarjeta = new JButton("Tarjeta");    
     private final JButton btnAperturar = new JButton("Aperturar caja");    
     
@@ -142,50 +142,50 @@ public class Main extends JFrame{
 
         @Override
         public void click() {
-            DialogoProducto.modificar(getThis());
+//            DialogoProducto.modificar(getThis());
         }
     };
     private final ItemSubmenu itemNuevaCategoria = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png"){
         @Override
         public void click() {
-            Categorias.nuevo(getThis());
+//            Categorias.nuevo(getThis());
         }        
     };
     private final ItemSubmenu itemNuevoCliente = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png") {
 
         @Override
         public void click() {
-            Clientes.nuevo(null);
+//            Clientes.nuevo(null);
         }
     };
     private final ItemSubmenu itemModificarCliente = new ItemSubmenu("Modificar", "/res/iconos/modificar.png") {
 
         @Override
         public void click() {
-            int id = BuscarCliente.mostrar(getThis(), "Seleccione el usuario a modificar");
-            
-            if(id == 0)
-                return;
-            
-            Clientes.mostrar(getThis(), id);
+//            int id = BuscarCliente.mostrar(getThis(), "Seleccione el usuario a modificar");
+//            
+//            if(id == 0)
+//                return;
+//            
+//            Clientes.mostrar(getThis(), id);
         }
     };
     private final ItemSubmenu itemNuevoUsuario = new ItemSubmenu("Nuevo", "/res/iconos/nuevo.png") {
         @Override
         public void click() {
-            DialogoUsuario.nuevo(getThis(), idUsuario, nivelUsuario);
+//            DialogoUsuario.nuevo(getThis(), idUsuario, nivelUsuario);
         }
     };
     private final ItemSubmenu itemModificarUsuario = new ItemSubmenu("Modificar", "/res/iconos/modificar.png") {
         @Override
         public void click() {
-            DialogoUsuario.modificar(getThis(), idUsuario, nivelUsuario);
+//            DialogoUsuario.modificar(getThis(), idUsuario, nivelUsuario);
         }
     };
     private final ItemSubmenu itemModificarUsuarioActual = new ItemSubmenu("Modificar Actual", "/res/iconos/usuario actual.png") {
         @Override
         public void click() {
-            DialogoUsuario.modificarUsuarioActual(getThis(), idUsuario, nivelUsuario);
+//            DialogoUsuario.modificarUsuarioActual(getThis(), idUsuario, nivelUsuario);
         }
     };
     private final ItemSubmenu itemIngresos = new ItemSubmenu("Ingresos", "/res/iconos/ingresos.png") {
@@ -229,32 +229,32 @@ public class Main extends JFrame{
     private final ItemSubmenu itemReporteConsultas = new ItemSubmenu("Consultas", "/res/iconos/consultar.png") {
         @Override
         public void click() {
-            new Consultas().setVisible(true);
+//            new Consultas().setVisible(true);
         }
     };
     private final ItemSubmenu itemApartado = new ItemSubmenu("Consultar", "/res/iconos/consultar.png") {
         @Override
         public void click() {
-            VentanaApartado apartado = new VentanaApartado(idUsuario);
-            apartado.setVisible(true);
+//            VentanaApartado apartado = new VentanaApartado(idUsuario);
+//            apartado.setVisible(true);
         }
     };
     private final ItemSubmenu itemPrecio = new ItemSubmenu("Precio", "/res/iconos/precio.png") {
         @Override
         public void click() {
-            ConsultarProducto.mostrar(getThis(), idUsuario);
+//            ConsultarProducto.mostrar(getThis(), idUsuario);
         }
     };
     private final ItemSubmenu itemExterno = new ItemSubmenu("Externo", "/res/iconos/existencia.png") {
         @Override
         public void click() {
-            JOptionPane.showMessageDialog(this, "Función aún no habilitada");
+//            JOptionPane.showMessageDialog(this, "Función aún no habilitada");
         }
     };    
     private final ItemSubmenu itemTransaccion = new ItemSubmenu("Transacciones", "/res/iconos/transacciones.png") {
         @Override
         public void click() {
-            ConsultarTransaccion.mostrar(getThis(), idUsuario);
+//            ConsultarTransaccion.mostrar(getThis(), idUsuario);
         }
     };    
     private final ItemSubmenu itemNuevoIngreso = new ItemSubmenu("Nuevo ingreso", "/res/iconos/ingresos.png") {
@@ -414,12 +414,14 @@ public class Main extends JFrame{
         ));                
         
         labelLogo.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width / 3, 150));
-        labelLogo.setBackground(new Color(0x9090f9));
-        labelLogo.setOpaque(false);  
+        labelLogo.setBackground(Color.WHITE);
+        labelLogo.setOpaque(true);  
         labelLogo.setHorizontalAlignment(JLabel.CENTER);
-        labelLogo.setIcon(new ImageIcon(new ImageIcon(
-                Configuracion.rutaLogo).getImage().
-                getScaledInstance((int)(Toolkit.getDefaultToolkit().getScreenSize().width / 3), 150, Image.SCALE_DEFAULT)));
+//        labelLogo.setIcon(new ImageIcon(new ImageIcon(
+//                Configuracion.rutaLogo).getImage().
+//                getScaledInstance((int)(Toolkit.getDefaultToolkit().getScreenSize().width / 3), 150, Image.SCALE_DEFAULT)));
+        labelLogo.setIcon(new ImageIcon(new ImageIcon(Login.class.getResource("/res/deac.png"))
+                .getImage().getScaledInstance(400, 200, Image.SCALE_SMOOTH)));
         
         tableVenta.setModel(modeloVenta);
         tableVenta.getColumnModel().getColumn(0).setMaxWidth(100);
@@ -522,15 +524,17 @@ public class Main extends JFrame{
 
             @Override
             public void actionPerformed(ActionEvent e) {                
-                insertCompraContado();
+                if(!listaProductos.isEmpty())
+                    insertCompraContado();
             }   
             
         });
         btnApartado.addActionListener(new ActionListener(){
 
             @Override
-            public void actionPerformed(ActionEvent e) {
-                insertCompraApartado();
+            public void actionPerformed(ActionEvent e) {                
+                if(!listaProductos.isEmpty())   
+                    insertCompraApartado();
             }
             
         });
@@ -549,10 +553,12 @@ public class Main extends JFrame{
         panelPublicidad.setLayout(new BorderLayout());
         panelPublicidad.add(labelPublicidad, BorderLayout.CENTER);
         
-            labelPublicidad.setIcon(new ImageIcon(new ImageIcon(
-                    Main.class.getResource("/res/fenix.png")).getImage().
-                    getScaledInstance(700, 500, Image.SCALE_SMOOTH))
-            );
+//            labelPublicidad.setIcon(new ImageIcon(new ImageIcon(
+//                    Main.class.getResource("/res/fenix.png")).getImage().
+//                    getScaledInstance(700, 500, Image.SCALE_SMOOTH))
+//            );
+        labelPublicidad.setOpaque(true);
+        labelPublicidad.setBackground(Color.WHITE);
                    
         panelBotones.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panelBotones.setOpaque(false);        
@@ -779,66 +785,117 @@ public class Main extends JFrame{
     private void insertCompraApartado(){
     
         boolean valido = true;
+        boolean apartadoIndividual = true;
         
-        SQLConnection.startTransaction();                
+        String individual = "Individual";
+        String grupal = "Grupal";
         
-        idClienteActual = BuscarCliente.mostrar(
-                this, 
-                "Seleccione el cliente que aparta");        
-        if(idClienteActual == 0)
+        Object tipo = JOptionPane.showInputDialog(
+                this,
+                "Seleccione el tipo de apartado",
+                "Tipo de apartado",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new Object[]{individual, grupal},
+                individual);
+        
+        if(tipo == null)
             return;
+        else if (tipo == individual){
         
-        for(int i = 0 ; i < listaProductos.size() && valido ; i++){
-            int folioApartado = createApartados(
-                    listaProductos.get(i), 
-                    idClienteActual);
+            SQLConnection.startTransaction();                
+        
+            idClienteActual = BuscarCliente.mostrar(
+                    this, 
+                    "Seleccione el cliente que aparta");        
+            if(idClienteActual == 0)
+                return;
             
-            valido = valido && (folioApartado != 0);            
-        }
-        
-        updateVenta("Apartado");
-        
-        if(valido){ 
-            SQLConnection.commit();
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Venta realizada correctamente"
-            );
+            for(int i = 0 ; i < listaProductos.size() && valido ; i++){
+                boolean apartadoCorrecto = createApartado(
+                        listaProductos.get(i), 
+                        idClienteActual);
+                
+                valido = valido && apartadoCorrecto;            
+            }
             
-            folioVentaActual = createVenta();            
-        }else{
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No fue posible realizar la compra"
-            );
-            SQLConnection.rollback();
+            updateVenta("Apartado");
+            
+            if(valido){ 
+                SQLConnection.commit();
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Venta realizada correctamente"
+                );
+                
+                folioVentaActual = createVenta();            
+            }else{
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No fue posible realizar la compra"
+                );
+                SQLConnection.rollback();
+            }
+        }else if(tipo == grupal){
+            SQLConnection.startTransaction();                
+        
+            idClienteActual = BuscarCliente.mostrar(
+                    this, 
+                    "Seleccione el cliente que aparta");        
+            if(idClienteActual == 0)
+                return;
+                        
+            boolean apartadoCorrecto = createApartado(
+                        listaProductos,
+                        idClienteActual);                            
+            
+            updateVenta("Apartado");
+            
+            if(apartadoCorrecto){ 
+                SQLConnection.commit();
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Venta realizada correctamente"
+                );
+                
+                folioVentaActual = createVenta();            
+            }else{
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No fue posible realizar la compra"
+                );
+                SQLConnection.rollback();
+            }
         }
     }
     
-    private int createApartados(Producto ing, int idCliente){
-        try {
-            boolean valido = true;
+    private boolean createApartado(Producto ing, int idCliente){
+        try {            
             int folioApartado = 0;
             int folioIngreso = 0;
             
-            String sqlBase = "INSERT INTO APARTADOS("
-                    + "ID_ASIGNACION, "
+            String sqlBase = "INSERT INTO APARTADOS("                    
                     + "ID_CLIENTE,"
-                    + "COSTO,"
+                    + "TOTAL,"
                     + "SALDO_PENDIENTE)"
-                    + "VALUES("
-                    + ing.idAsignacion + ","
+                    + "VALUES("                    
                     + idCliente + ","
                     + ing.precio + ","
-                    + ing.precio * (1 - porcentajeApartado) + ")";            
-            String getFolio = "SELECT MAX(FOLIO) AS FOLIO FROM APARTADOS";
+                    + ing.precio + ")";  //Pendiente obtener el enganche
+            String getFolio = "SELECT MAX(FOLIO) AS FOLIO FROM APARTADOS";            
             
             if(!SQLConnection.update(sqlBase))
-                return 0;
+                return false;
             
             ResultSet consulta = SQLConnection.select(getFolio);
             consulta.next();
             folioApartado = consulta.getInt("FOLIO");
+            
+            String sqlApartadoProductos = 
+                    "INSERT INTO APARTADOS_ASIGNACIONES(FOLIO_APARTADO, ID_ASIGNACION) "
+                    + "VALUES(" + folioApartado + ", " + ing.idAsignacion + ")";
+            if(!SQLConnection.update(sqlApartadoProductos))
+                return false;
             
             folioIngreso = Ingreso.nuevoParaEnganche(
                     this,
@@ -847,7 +904,17 @@ public class Main extends JFrame{
                     ing.precio * porcentajeApartado,
                     ing.nombre);
             if(folioIngreso == 0)
-                return 0;
+                return false;
+            
+            String getMonto = "SELECT MONTO FROM INGRESOS WHERE FOLIO=" + folioIngreso;
+            consulta = SQLConnection.select(getMonto);
+            float monto = 0;
+            if(consulta.next())
+                monto = consulta.getFloat("MONTO");                        
+            
+            String updateSaldo = "UPDATE APARTADOS "
+                    + "SET SALDO_PENDIENTE=SALDO_PENDIENTE-" + monto + " "
+                    + "WHERE FOLIO=" + folioApartado;                    
             
             String insertAbono = "INSERT INTO ABONOS("
                     + "FOLIO_TICKET, "
@@ -855,14 +922,85 @@ public class Main extends JFrame{
                     + "VALUES("                    
                     + folioIngreso + ","
                     + folioApartado + ")";
-            if(!SQLConnection.update(insertAbono)) 
-                return 0;                                            
+            if(!SQLConnection.update(insertAbono) || !SQLConnection.update(updateSaldo)) 
+                return false;                                            
                     
-            return folioApartado;
+            return true;
         } catch (SQLException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return 0;
+        return false;
+    }
+    
+    private boolean createApartado(ArrayList<Producto> ing, int idCliente){
+        try {            
+            int folioApartado = 0;
+            int folioIngreso = 0;
+            
+            float total = 0;
+            for(int i = 0 ; i < ing.size() ; i++){
+                total += ing.get(i).precio;
+            }
+            
+            String sqlBase = "INSERT INTO APARTADOS("                    
+                    + "ID_CLIENTE,"
+                    + "TOTAL,"
+                    + "SALDO_PENDIENTE)"
+                    + "VALUES("                    
+                    + idCliente + ","
+                    + total + ","
+                    + total + ")";  //Pendiente obtener el enganche            
+            String getFolio = "SELECT MAX(FOLIO) AS FOLIO FROM APARTADOS";
+            String getEnganche = "SELECT MONTO FROM INGRESOS ";
+            
+            if(!SQLConnection.update(sqlBase))
+                return false;
+            
+            ResultSet consulta = SQLConnection.select(getFolio);
+            consulta.next();
+            folioApartado = consulta.getInt("FOLIO");              
+            
+            String sqlApartadoProductos = 
+                    "INSERT INTO APARTADOS_ASIGNACIONES(FOLIO_APARTADO, ID_ASIGNACION) "
+                    + "SELECT " + folioApartado + ", ID_ASIGNACION "
+                    + "FROM VENTAS_PRODUCTOS WHERE FOLIO_VENTA=" + folioVentaActual;
+            if(!SQLConnection.update(sqlApartadoProductos))
+                return false;
+            
+            folioIngreso = Ingreso.nuevoParaEnganche(
+                    this,
+                    idUsuario,
+                    folioApartado,
+                    total * porcentajeApartado,
+                    "");
+            if(folioIngreso == 0)
+                return false;
+            
+            String getMonto = "SELECT MONTO FROM INGRESOS WHERE FOLIO=" + folioIngreso;
+            consulta = SQLConnection.select(getMonto);
+            float monto = 0;
+            if(consulta.next())
+                monto = consulta.getFloat("MONTO");
+            String updateSaldo = "UPDATE APARTADOS "
+                    + "SET SALDO_PENDIENTE=SALDO_PENDIENTE-" + monto + " "
+                    + "WHERE FOLIO=" + folioApartado; 
+                        
+            System.out.println(updateSaldo);
+            
+            String insertAbono = "INSERT INTO ABONOS("
+                    + "FOLIO_TICKET, "
+                    + "FOLIO_APARTADO)"
+                    + "VALUES("                    
+                    + folioIngreso + ","
+                    + folioApartado + ")";
+            if(!SQLConnection.update(insertAbono) || !SQLConnection.update(updateSaldo)) 
+                return false;                                            
+                    
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;       
     }
     
     private boolean updateVenta(String formaDePago){

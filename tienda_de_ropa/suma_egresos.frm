@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `tienda_de_ropa`.`egresos`.`FECHA` AS `FECHA`,sum(`tienda_de_ropa`.`egresos`.`MONTO`) AS `MONTO` from `tienda_de_ropa`.`egresos` group by `tienda_de_ropa`.`egresos`.`FECHA`
+md5=c06ef738217c0f0df81675c4f7f0d2e3
+updatable=0
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2018-05-08 14:52:54
+create-version=1
+source=select `egresos`.`FECHA` AS `FECHA`,sum(`egresos`.`MONTO`) AS `MONTO` from `egresos` group by `egresos`.`FECHA`
+client_cs_name=utf8
+connection_cl_name=utf8_general_ci
+view_body_utf8=select `tienda_de_ropa`.`egresos`.`FECHA` AS `FECHA`,sum(`tienda_de_ropa`.`egresos`.`MONTO`) AS `MONTO` from `tienda_de_ropa`.`egresos` group by `tienda_de_ropa`.`egresos`.`FECHA`

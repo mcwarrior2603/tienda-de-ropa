@@ -1,0 +1,20 @@
+INSERT INTO FORMAS_DE_PAGO(NOMBRE) VALUES
+("Efectivo"), ("Apartado"), ("Tarjeta"),  ("Pendiente"), ("Cancelado");
+
+INSERT INTO TIPOS_INGRESOS(TIPO) VALUES
+("Abono"), ("Recarga"), ("Pago de contado");
+
+INSERT INTO TIPOS_EGRESOS(TIPO) VALUES
+("Proveedor"), ("Servicios"), ("Compra de mercancia"); 
+
+INSERT INTO NIVELES_USUARIO(ID, NOMBRE) VALUES
+	(0, "Superusuario"),
+	(1, "Administrador"),
+	(2, "Cajero");		
+		
+INSERT INTO USUARIOS(NOMBRE, CONTRASENIA, ID_NIVEL, ACTIVO)VALUES
+	('Fenixoft','$2a$10$AitzRhvWtVIfcVagoHj8x.Ov.GrSpJ48U9pWF3bRMJobDpVvEdTOK','0',true),
+	('Admin', '$2a$10$iVBRIjSjRoNfxUaowyMh.u2Yg4lW2HoPM3ryacKmRzXdT1OuxYDh6', 1, true);
+
+INSERT INTO CLIENTES(NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO1, TELEFONO2)
+VALUES	('Publico', 'General', '', '0000000000','');

@@ -329,14 +329,16 @@ public class DialogoProducto extends javax.swing.JDialog {
                     + "ID_CATEGORIA,"
                     + "PRECIO,"
                     + "DETALLES,"
-                    + "IMAGEN) VALUES("
+                    + "IMAGEN,"
+                    + "TALLA) VALUES("
                     + "'" + txtClave.getText().trim() + "',"
                     + "'" + txtNombre.getText() + "',"
                     + chkNuevo.isSelected() + ","
                     + ((Categoria) cboCategorias.getSelectedItem()).id + ","
                     + txtPrecio.getText() + ","
                     + "'" + txtDetalles.getText() + "',"
-                    + "'" + txtImagen.getText().replace("\\", "/") + "');";
+                    + "'" + txtImagen.getText().replace("\\", "/") + "',"
+                    + "'0');";
         else
             sql = "UPDATE PRODUCTOS SET "
                     + "CLAVE=" + "'" + txtClave.getText().trim() + "',"

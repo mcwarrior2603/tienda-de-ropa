@@ -451,11 +451,10 @@ public class Ingreso extends javax.swing.JDialog {
     }
     
     public static int nuevoParaAbono(JFrame parent, int idUsuarioActual, 
-            int folioApartado, String apartado){
+            int folioApartado){
         Ingreso dialogo = new Ingreso(parent, true, idUsuarioActual, NUEVO_CON_REFERENCIA, folioApartado, 0);
         
-        dialogo.txtFolioReferencia.setText(folioApartado + "");        
-        dialogo.txtDetalles.setText("Apartado:" + apartado);
+        dialogo.txtFolioReferencia.setText(folioApartado + "");                
         dialogo.cboTipo.setEnabled(false);
         
         dialogo.setVisible(true);

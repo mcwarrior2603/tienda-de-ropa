@@ -68,9 +68,11 @@ public class SQLConnection {
             return true;
         try {
             cargarConfiguracion();
+            
             Class.forName("com.mysql.jdbc.Driver");
             conexion = conexion = DriverManager.getConnection("jdbc:mysql://" + host + "/" + dbName + 
-                        "?user=" + user + "&password=" + password);
+                        "?user=" + user + "&password=" + password);                                    
+            
             System.out.println("Conexion establecida");
             return true;
         } catch (ClassNotFoundException ex) {

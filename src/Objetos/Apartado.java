@@ -5,6 +5,8 @@
  */
 package Objetos;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Raul
@@ -12,27 +14,23 @@ package Objetos;
 public class Apartado {
 
     public int folio;
-    public int folioDeVenta;
-    public String claveProducto;
-    public String nombre;
-    public float precio;
+    public int folioDeVenta;    
+    public float total;
     public float saldoPendiente;
     public boolean cancelado;
     public boolean entregado;
+    
+    public ArrayList<Producto> productos = new ArrayList();
 
     public Apartado(int folio, 
-            int folioDeVenta, 
-            String claveProducto,
-            String nombre, 
-            float precio, 
+            int folioDeVenta,             
+            float total, 
             float saldoPendiente, 
             boolean cancelado, 
             boolean entregado) {
         this.folio = folio;
-        this.folioDeVenta = folioDeVenta;  
-        this.claveProducto = claveProducto;
-        this.nombre = nombre;
-        this.precio = precio;
+        this.folioDeVenta = folioDeVenta;          
+        this.total = total;
         this.saldoPendiente = saldoPendiente;
         this.cancelado = cancelado;
         this.entregado = entregado;
@@ -40,7 +38,7 @@ public class Apartado {
         
     @Override
     public String toString(){
-        return nombre  
+        return folio  
                 + (cancelado ? " : Cancelado" : "") 
                 + (entregado ? " : Entregado" : "");
     }

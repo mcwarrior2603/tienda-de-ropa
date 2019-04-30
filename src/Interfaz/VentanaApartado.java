@@ -34,6 +34,11 @@ public class VentanaApartado extends javax.swing.JFrame {
     private int subfolio = 0;
     
     private DefaultComboBoxModel<Apartado> listaApartados = new DefaultComboBoxModel();   
+    
+    
+    private DefaultTableModel modelProductos = new DefaultTableModel(
+            new Object[]{"Prodcto", "Precio"},
+            0);
     private DefaultTableModel modelAbonos = new DefaultTableModel(
             new Object[]{"Ticket", "Fecha", "Recibió", "Monto", "Cancelado"},
             0){
@@ -77,18 +82,19 @@ public class VentanaApartado extends javax.swing.JFrame {
         txtFolio = new javax.swing.JTextField();
         txtCliente = new Utilidades.JTextfieldPlaceHolder();
         cboApartados = new javax.swing.JComboBox();
-        txtPrecio = new Utilidades.JTextfieldPlaceHolder();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableAbonos = new javax.swing.JTable();
         btnAbonar = new javax.swing.JButton();
         btnEntregar = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        txtSaldo = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        txtFolioDeVenta = new javax.swing.JTextField();
+        txtSaldo = new javax.swing.JTextField();
         btnEliminar = new javax.swing.JButton();
         chkCancelado = new javax.swing.JCheckBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        txtFolioDeVenta = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -108,6 +114,11 @@ public class VentanaApartado extends javax.swing.JFrame {
                 txtClienteMouseClicked(evt);
             }
         });
+        txtCliente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtClienteActionPerformed(evt);
+            }
+        });
 
         cboApartados.setModel(listaApartados);
         cboApartados.addItemListener(new java.awt.event.ItemListener() {
@@ -115,9 +126,6 @@ public class VentanaApartado extends javax.swing.JFrame {
                 cboApartadosItemStateChanged(evt);
             }
         });
-
-        txtPrecio.setEditable(false);
-        txtPrecio.setPlaceholder("Precio");
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel3.setText("Abonos");
@@ -149,12 +157,15 @@ public class VentanaApartado extends javax.swing.JFrame {
 
         jLabel4.setText("Saldo");
 
-        txtSaldo.setEditable(false);
-
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel5.setText("Folio De Venta");
 
-        txtFolioDeVenta.setEditable(false);
+        txtSaldo.setEditable(false);
+        txtSaldo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtSaldoActionPerformed(evt);
+            }
+        });
 
         btnEliminar.setText("Eliminar");
         btnEliminar.setEnabled(false);
@@ -168,6 +179,11 @@ public class VentanaApartado extends javax.swing.JFrame {
         chkCancelado.setText("Cancelado");
         chkCancelado.setEnabled(false);
 
+        jTable1.setModel(modelProductos);
+        jScrollPane2.setViewportView(jTable1);
+
+        txtFolioDeVenta.setEditable(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -175,37 +191,38 @@ public class VentanaApartado extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCliente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnAbonar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnEntregar)
-                        .addGap(18, 18, 18)
-                        .addComponent(chkCancelado)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtSaldo, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtFolioDeVenta, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
-                            .addComponent(txtFolio)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addGap(0, 534, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(cboApartados, javax.swing.GroupLayout.PREFERRED_SIZE, 459, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtPrecio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(chkCancelado)
+                        .addGap(40, 40, 40)
+                        .addComponent(btnEntregar)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSaldo, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane2)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(168, 168, 168)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtFolio, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtFolioDeVenta, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel3))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtCliente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cboApartados, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -223,25 +240,24 @@ public class VentanaApartado extends javax.swing.JFrame {
                             .addComponent(jLabel5)
                             .addComponent(txtFolioDeVenta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(13, 13, 13)
-                .addComponent(txtCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cboApartados, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboApartados, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSaldo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnAbonar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnEntregar)
-                        .addComponent(jLabel4)
-                        .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(chkCancelado)))
-                .addContainerGap(24, Short.MAX_VALUE))
+                    .addComponent(btnAbonar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnEliminar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkCancelado)
+                    .addComponent(jLabel4)
+                    .addComponent(btnEntregar))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -325,11 +341,19 @@ public class VentanaApartado extends javax.swing.JFrame {
         cargarClienteActual();
     }//GEN-LAST:event_btnEntregarActionPerformed
 
+    private void txtClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClienteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtClienteActionPerformed
+
+    private void txtSaldoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSaldoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSaldoActionPerformed
+
     private void entregar(Apartado temp){
         String sqlEntregar = "UPDATE APARTADOS SET ENTREGADO=TRUE WHERE FOLIO=" + temp.folio;        
         String updateInventario = "UPDATE PRODUCTOS "
                 + "SET EXISTENCIA=EXISTENCIA-1 "
-                + "WHERE CLAVE='" + temp.claveProducto + "'";
+                + "WHERE CLAVE='";
         
         SQLConnection.startTransaction();                
         
@@ -356,7 +380,7 @@ public class VentanaApartado extends javax.swing.JFrame {
         String sqlCancelar = "UPDATE APARTADOS SET CANCELADO=TRUE WHERE FOLIO=" + temp.folio;        
         String updateInventario = "UPDATE PRODUCTOS "
                 + "SET EXISTENCIA=EXISTENCIA+1 "
-                + "WHERE CLAVE='" + temp.claveProducto + "'";
+                + "WHERE CLAVE='";
         
         SQLConnection.startTransaction();
         
@@ -416,21 +440,17 @@ public class VentanaApartado extends javax.swing.JFrame {
                 sql = "SELECT * FROM APARTADOS_POR_CLIENTE WHERE ID_CLIENTE=" + idClienteActual;
                 consulta = SQLConnection.select(sql);
                 
-                listaApartados.removeAllElements(); 
-                txtPrecio.setText("");
+                listaApartados.removeAllElements();                 
                 txtSaldo.setText("");
-                txtFolio.setText("");
-                txtFolioDeVenta.setText("");
+                txtFolio.setText("");                
                 modelAbonos.setRowCount(0);
                 btnAbonar.setEnabled(false);
                 btnEntregar.setEnabled(false);
                 for(int i = 0 ; consulta.next() ; i++) {
                     Apartado temp = new Apartado(
                             consulta.getInt("FOLIO"),
-                            consulta.getInt("FOLIO_VENTA"),
-                            consulta.getString("CLAVE_PRODUCTO"),
-                            consulta.getString("NOMBRE"),
-                            consulta.getFloat("PRECIO"),
+                            consulta.getInt("FOLIO_VENTA"),                            
+                            consulta.getFloat("TOTAL"),
                             consulta.getFloat("SALDO_PENDIENTE"),
                             consulta.getBoolean("CANCELADO"),
                             consulta.getBoolean("ENTREGADO")
@@ -454,17 +474,17 @@ public class VentanaApartado extends javax.swing.JFrame {
     
     private void cargarApartado(){
         String sql = "";
+        String sqlArticulos = "";
         try {
             Apartado temp = (Apartado) listaApartados.getSelectedItem();
             
             if(temp == null)
-                return;                        
+                return;                                                 
             
             folioActual = temp.folio;
             
             txtFolio.setText(temp.folio + "");
-            txtFolioDeVenta.setText(temp.folioDeVenta + "");
-            txtPrecio.setText(temp.precio + "");
+            txtSaldo.setText(temp.folioDeVenta + "");            
             txtSaldo.setText(temp.saldoPendiente + "");   
             chkCancelado.setSelected(temp.cancelado);
             btnEliminar.setEnabled(!temp.cancelado);
@@ -476,12 +496,24 @@ public class VentanaApartado extends javax.swing.JFrame {
             if(temp.saldoPendiente == 0 && !temp.cancelado && !temp.entregado)
                 btnEntregar.setEnabled(true);
             
-            sql = "SELECT * FROM ABONOS_APARTADOS WHERE FOLIO_APARTADO=" + temp.folio;
-            ResultSet consulta = SQLConnection.select(sql);
+            sql = "SELECT * FROM ABONOS_APARTADOS "
+                    + "WHERE FOLIO_APARTADO=" + temp.folio;
+            sqlArticulos = "SELECT * FROM PRODUCTOS_POR_APARTADOS "
+                    + "WHERE FOLIO_APARTADO=" + temp.folio;
             
-            modelAbonos.setRowCount(0);
+            ResultSet consulta = SQLConnection.select(sqlArticulos);            
+            modelProductos.setRowCount(0);
             while(consulta.next()){
-                
+                modelProductos.addRow(new Object[]{
+                    consulta.getString("NOMBRE"),
+                    consulta.getFloat("PRECIO")
+                });
+            }            
+            
+            consulta = SQLConnection.select(sql);
+            modelAbonos.setRowCount(0);
+            while(consulta.next()){             
+                                
                 modelAbonos.addRow(new Object[]{
                     consulta.getInt("FOLIO_TICKET"),
                     consulta.getString("FECHA"),
@@ -503,8 +535,7 @@ public class VentanaApartado extends javax.swing.JFrame {
         int folioIngreso = Ingreso.nuevoParaAbono(
                 this, 
                 idUsuarioActual, 
-                ((Apartado)cboApartados.getSelectedItem()).folio,
-                ((Apartado)cboApartados.getSelectedItem()).nombre);
+                ((Apartado)cboApartados.getSelectedItem()).folio);
         
         if(folioIngreso != 0){
             try {
@@ -594,11 +625,12 @@ public class VentanaApartado extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
     private javax.swing.JTable tableAbonos;
     private Utilidades.JTextfieldPlaceHolder txtCliente;
     private javax.swing.JTextField txtFolio;
     private javax.swing.JTextField txtFolioDeVenta;
-    private Utilidades.JTextfieldPlaceHolder txtPrecio;
     private javax.swing.JTextField txtSaldo;
     // End of variables declaration//GEN-END:variables
 }

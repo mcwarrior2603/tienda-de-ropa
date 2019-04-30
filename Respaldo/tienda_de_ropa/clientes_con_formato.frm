@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `tienda_de_ropa`.`clientes`.`ID` AS `ID`,concat(`tienda_de_ropa`.`clientes`.`NOMBRE`,\' \',`tienda_de_ropa`.`clientes`.`APELLIDO_PATERNO`,\' \',`tienda_de_ropa`.`clientes`.`APELLIDO_MATERNO`) AS `NOMBRE`,`tienda_de_ropa`.`clientes`.`TELEFONO1` AS `TELEFONO1`,`tienda_de_ropa`.`clientes`.`TELEFONO2` AS `TELEFONO2` from `tienda_de_ropa`.`clientes`
+md5=ec43070a193555a9e4b4542b0b25612e
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2018-03-09 22:08:33
+create-version=1
+source=select `clientes`.`ID` AS `ID`,concat(`clientes`.`NOMBRE`,\' \',`clientes`.`APELLIDO_PATERNO`,\' \',`clientes`.`APELLIDO_MATERNO`) AS `NOMBRE`,`clientes`.`TELEFONO1` AS `TELEFONO1`,`clientes`.`TELEFONO2` AS `TELEFONO2` from `clientes`
+client_cs_name=utf8
+connection_cl_name=utf8_general_ci
+view_body_utf8=select `tienda_de_ropa`.`clientes`.`ID` AS `ID`,concat(`tienda_de_ropa`.`clientes`.`NOMBRE`,\' \',`tienda_de_ropa`.`clientes`.`APELLIDO_PATERNO`,\' \',`tienda_de_ropa`.`clientes`.`APELLIDO_MATERNO`) AS `NOMBRE`,`tienda_de_ropa`.`clientes`.`TELEFONO1` AS `TELEFONO1`,`tienda_de_ropa`.`clientes`.`TELEFONO2` AS `TELEFONO2` from `tienda_de_ropa`.`clientes`

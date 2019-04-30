@@ -54,6 +54,7 @@ public class PuntoDeVentaTiendaDeRopa {
         }
         //</editor-fold>        
         init();
+               
         
         new Login().setVisible(true);
     }

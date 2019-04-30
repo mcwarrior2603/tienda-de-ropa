@@ -7,12 +7,15 @@ package Interfaz;
 
 import BaseDeDatos.SQLConnection;
 import Utilidades.BCrypt;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.Image;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 /**
  *
@@ -28,9 +31,8 @@ public class Login extends javax.swing.JFrame {
         
         Configuracion.cargarConfiguracion();
         
-        setLocationRelativeTo(null);
-        
-        lblLogo.setIcon(new ImageIcon(new ImageIcon(Configuracion.rutaLogo)
+        setLocationRelativeTo(null);                                        
+        lblLogo.setIcon(new ImageIcon(new ImageIcon(Login.class.getResource("/res/deac.png"))
                 .getImage().getScaledInstance(400, 200, Image.SCALE_SMOOTH)));
     }
 
@@ -53,6 +55,7 @@ public class Login extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 0, 0));
+        setFont(new java.awt.Font("Segoe Script", 0, 36)); // NOI18N
         setMinimumSize(new java.awt.Dimension(400, 300));
         setResizable(false);
 
